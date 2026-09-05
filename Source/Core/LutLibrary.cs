@@ -37,7 +37,9 @@ namespace ClassicLightFX.Core
 
                 var texture = new Texture2D(2, 2, TextureFormat.ARGB32, false);
                 texture.LoadImage(buffer);
-                texture.Apply(false, true);
+                // The wrapper conversion below reads the pixels back, so the
+                // texture must stay readable (makeNoLongerReadable: false).
+                texture.Apply(false, false);
                 return texture;
             }
         }
