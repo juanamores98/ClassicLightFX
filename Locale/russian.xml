@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Language UniqueName="ru" ReadableName="Ð ÑƒÑÑÐºÐ¸Ð¹" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Translations>
+    <Translation ID="CLX_DESCRIPTION" String="Ð’Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ Ð±ÐµÐ»Ñ‹Ð¹ Ð´Ð½ÐµÐ²Ð½Ð¾Ð¹ ÑÐ²ÐµÑ‚, ÐºÐ°Ðº ÑÑ‚Ð¾ Ð±Ñ‹Ð»Ð¾ Ð´Ð¾ Ð²Ñ‹Ñ…Ð¾Ð´Ð° After Dark" />
+    <!-- OPTIONS -->
+    <Translation ID="CLX_OPTIONS_BASIC" String="Ð‘Ð°Ð·Ð¾Ð²Ñ‹Ðµ Ð¾Ð¿Ñ†Ð¸Ð¸" />
+    <Translation ID="CLX_OPTIONS_ADVANCED" String="Ð Ð°ÑÑˆÐ¸Ñ€ÐµÐ½Ð½Ñ‹Ðµ Ð¾Ð¿Ñ†Ð¸Ð¸" />
+    <Translation ID="CLX_OPTION_LUTS" String="ÐšÐ»Ð°ÑÑÐ¸Ñ‡ÐµÑÐºÐ¸Ðµ ÑÑ‚Ð°Ð½Ð´Ð°Ñ€Ñ‚Ð½Ñ‹Ðµ LUT" />
+    <Translation ID="CLX_OPTION_SUN_COLOR" String="ÐšÐ»Ð°ÑÑÐ¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ†Ð²ÐµÑ‚ Ð´Ð½ÐµÐ²Ð½Ð¾Ð³Ð¾ ÑÐ²ÐµÑ‚Ð°" />
+    <Translation ID="CLX_OPTION_SUN_INTENSITY" String="ÐšÐ»Ð°ÑÑÐ¸Ñ‡ÐµÑÐºÐ°Ñ ÑÑ€ÐºÐ¾ÑÑ‚ÑŒ Ð´Ð½ÐµÐ²Ð½Ð¾Ð³Ð¾ ÑÐ²ÐµÑ‚Ð°" />
+    <Translation ID="CLX_OPTION_SUN_POSITION" String="ÐšÐ»Ð°ÑÑÐ¸Ñ‡ÐµÑÐºÐ¸Ðµ Ð´Ð¾Ð»Ð³Ð¾Ñ‚Ð°/ÑˆÐ¸Ñ€Ð¾Ñ‚Ð°" />
+    <Translation ID="CLX_OPTION_FOG_EFFECT" String="ÐšÐ»Ð°ÑÑÐ¸Ñ‡ÐµÑÐºÐ¸Ð¹ ÑÑ„Ñ„ÐµÐºÑ‚ Ñ‚ÑƒÐ¼Ð°Ð½Ð°" />
+    <Translation ID="CLX_OPTION_FOG_COLOR" String="ÐšÐ»Ð°ÑÑÐ¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ†Ð²ÐµÑ‚ Ñ‚ÑƒÐ¼Ð°Ð½Ð° Ð´Ð»Ñ Ð½Ð¾Ð²Ð¾Ð³Ð¾ ÑÑ„Ñ„ÐµÐºÑ‚Ð°" />
+    <Translation ID="CLX_OPTION_CLASSIC_EFFECT_IF_CYCLE_ENABLED" String="Ð Ð°Ð·Ñ€ÐµÑˆÐ¸Ñ‚ÑŒ ÐºÐ»Ð°ÑÑÐ¸Ñ‡ÐµÑÐºÐ¸Ð¹ ÑÑ„Ñ„ÐµÐºÑ‚ Ñ‚ÑƒÐ¼Ð°Ð½Ð° ÐµÑÐ»Ð¸ ÑÐ¼ÐµÐ½Ð° Ð´Ð½Ñ Ð¸ Ð½Ð¾Ñ‡Ð¸ Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½Ð°" />
+    <!-- ACTIONS -->
+    <Translation ID="CLX_ACTIONS_SHORTCUTS" String="Ð‘Ñ‹ÑÑ‚Ñ€Ð°Ñ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ°" />
+    <Translation ID="CLX_ACTION_TO_CLASSIC" String="Ð’ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð²ÑÐµ Ð¾Ð¿Ñ†Ð¸Ð¸" />
+    <Translation ID="CLX_ACTION_TO_AD" String="Ð’Ñ‹ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð²ÑÐµ Ð¾Ð¿Ñ†Ð¸Ð¸" /> 
+  </Translations>
+</Language>
+

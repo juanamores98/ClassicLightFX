@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Language UniqueName="ko" ReadableName="Korean" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Translations>
+    <Translation ID="CLX_DESCRIPTION" String="ì´ì „ì˜ í´ëž˜ì‹ í°ìƒ‰ í–‡ë¹›ì„ ë¶ˆëŸ¬ì˜µë‹ˆë‹¤" />
+	<!-- OPTIONS -->
+		<Translation ID="CLX_OPTIONS_BASIC" String="ê¸°ë³¸ ê¸°ëŠ¥ (ëª¨ë‘ì—ê²Œ ê¶Œìž¥í•¨)" />
+		<Translation ID="CLX_OPTIONS_ADVANCED" String="ê³ ê¸‰ ê¸°ëŠ¥ (ë¶€ìž‘ìš© ìžˆì„ ìˆ˜ ìžˆìŒ)" />
+		<Translation ID="CLX_OPTION_LUTS" String="í´ëž˜ì‹ ìƒ‰ë³´ì • ì‚¬ìš©" />
+		<Translation ID="CLX_OPTION_SUN_COLOR" String="í´ëž˜ì‹ í–‡ë¹› ìƒ‰ìƒ" />
+		<Translation ID="CLX_OPTION_SUN_INTENSITY" String="í´ëž˜ì‹ í–‡ë¹› ê°•ë„" />
+		<Translation ID="CLX_OPTION_SUN_POSITION" String="í´ëž˜ì‹ íƒœì–‘ ìœ„ì¹˜" />
+		<Translation ID="CLX_OPTION_FOG_EFFECT" String="í´ëž˜ì‹ ì•ˆê°œ íš¨ê³¼" />
+		<Translation ID="CLX_OPTION_FOG_COLOR" String="ì• í”„í„° ë‹¤í¬ë¥¼ ìœ„í•œ í´ëž˜ì‹ ì•ˆê°œ íš¨ê³¼" />
+    <Translation ID="CLX_OPTION_CLASSIC_EFFECT_IF_CYCLE_ENABLED" String="ì£¼/ì•¼ê°„ ê¸°ëŠ¥ ì‚¬ìš©ì¤‘ì— í´ëž˜ì‹ ì•ˆê°œê¸°ëŠ¥ì„ í—ˆìš©í•©ë‹ˆë‹¤" />
+  <!-- ACTIONS -->
+  	<Translation ID="CLX_ACTIONS_SHORTCUTS" String="ë¹ ë¥¸ ì„¤ì •" />
+    <Translation ID="CLX_ACTION_TO_CLASSIC" String="í´ëž˜ì‹ ì„¸íŒ… ë¶ˆëŸ¬ì˜¤ê¸°" />
+    <Translation ID="CLX_ACTION_TO_AD" String="ì• í”„í„° ë‹¤í¬ ì„¸íŒ… ë¶ˆëŸ¬ì˜¤ê¸°" />
+  </Translations>
+</Language>
+
