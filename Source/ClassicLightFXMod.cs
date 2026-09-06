@@ -1,4 +1,4 @@
-﻿using ICities;
+using ICities;
 using ClassicLightFX.Core;
 using ClassicLightFX.Options;
 
@@ -31,7 +31,95 @@ namespace ClassicLightFX
         {
             OptionsPanel.Build(helper);
         }
+
+        /// <summary>
+        /// Suite profile coordinator entry point: applies a <classiclightfx> XML section.
+        /// </summary>
+        public static bool ApplySuiteSection(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+            {
+                return false;
+            }
+
+            try
+            {
+                var doc = new System.Xml.XmlDocument();
+                doc.LoadXml(xml);
+                return ApplySuiteSection(doc.DocumentElement);
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogException(e);
+                return false;
+            }
+        }
+
+        public static bool ApplySuiteSection(System.Xml.XmlElement element)
+        {
+            if (element == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                var opt = ModOptions.Instance;
+                foreach (System.Xml.XmlNode node in element.ChildNodes)
+                {
+                    if (node.NodeType != System.Xml.XmlNodeType.Element) continue;
+                    string name = node.Name.ToLowerInvariant();
+                    string val = node.InnerText != null ? node.InnerText.Trim() : string.Empty;
+                    bool b;
+
+                    if (name == "swapluts" && bool.TryParse(val, out b)) opt.SwapLuts = b;
+                    else if (name == "suncolor" && bool.TryParse(val, out b)) opt.SunColor = b;
+                    else if (name == "sunstrength" && bool.TryParse(val, out b)) opt.SunStrength = b;
+                    else if (name == "suncoords" && bool.TryParse(val, out b)) opt.SunCoords = b;
+                    else if (name == "classicfogmode" && bool.TryParse(val, out b)) opt.ClassicFogMode = b;
+                    else if (name == "classicfogtint" && bool.TryParse(val, out b)) opt.ClassicFogTint = b;
+                    else if (name == "applyonload" && bool.TryParse(val, out b)) opt.ApplyOnLoad = b;
+                }
+
+                ClassicTweaks.ReplaceLuts(opt.SwapLuts);
+                ClassicTweaks.ReplaceSunlightColor(opt.SunColor);
+                ClassicTweaks.ReplaceSunlightIntensity(opt.SunStrength);
+                ClassicTweaks.ReplaceLatLong(opt.SunCoords);
+                ClassicTweaks.ReplaceFogEffect(opt.ClassicFogMode);
+
+                ModOptions.SaveImmediate();
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogException(e);
+                return false;
+            }
+        }
+
+        public static string ExportSuiteSection()
+        {
+            var opt = ModOptions.Instance;
+            return string.Format(
+                "  <classiclightfx>\n" +
+                "    <swapLuts>{0}</swapLuts>\n" +
+                "    <sunColor>{1}</sunColor>\n" +
+                "    <sunStrength>{2}</sunStrength>\n" +
+                "    <sunCoords>{3}</sunCoords>\n" +
+                "    <classicFogMode>{4}</classicFogMode>\n" +
+                "    <classicFogTint>{5}</classicFogTint>\n" +
+                "    <applyOnLoad>{6}</applyOnLoad>\n" +
+                "  </classiclightfx>",
+                opt.SwapLuts.ToString().ToLowerInvariant(),
+                opt.SunColor.ToString().ToLowerInvariant(),
+                opt.SunStrength.ToString().ToLowerInvariant(),
+                opt.SunCoords.ToString().ToLowerInvariant(),
+                opt.ClassicFogMode.ToString().ToLowerInvariant(),
+                opt.ClassicFogTint.ToString().ToLowerInvariant(),
+                opt.ApplyOnLoad.ToString().ToLowerInvariant());
+        }
     }
+
 
     public class LoadingExtension : LoadingExtensionBase
     {

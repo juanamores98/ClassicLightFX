@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Xml.Serialization;
 using UnityEngine;
@@ -21,6 +21,11 @@ namespace ClassicLightFX.Options
         internal bool ClassicFogMode = true;
         internal bool ClassicFogTint = true;
         internal bool ApplyOnLoad = true;
+        internal float WindowX = 920f;
+        internal float WindowY = 140f;
+
+        private static float _lastSaveTime = -10f;
+        private static bool _dirty;
 
         private ModOptions()
         {
@@ -52,8 +57,28 @@ namespace ClassicLightFX.Options
             }
         }
 
-        internal static void Save()
+        internal static void Save(bool immediate = false)
         {
+            _dirty = true;
+            float now = Time.realtimeSinceStartup;
+            if (immediate || now - _lastSaveTime >= 1.0f)
+            {
+                SaveImmediate();
+            }
+        }
+
+        internal static void CheckPendingSave()
+        {
+            if (_dirty && Time.realtimeSinceStartup - _lastSaveTime >= 1.0f)
+            {
+                SaveImmediate();
+            }
+        }
+
+        internal static void SaveImmediate()
+        {
+            _dirty = false;
+            _lastSaveTime = Time.realtimeSinceStartup;
             try
             {
                 using (var writer = new StreamWriter(FileName))
@@ -80,6 +105,9 @@ namespace ClassicLightFX.Options
             [XmlElement("fogMode")] public bool ClassicFogMode { get => ModOptions.Instance.ClassicFogMode; set => ModOptions.Instance.ClassicFogMode = value; }
             [XmlElement("fogTint")] public bool ClassicFogTint { get => ModOptions.Instance.ClassicFogTint; set => ModOptions.Instance.ClassicFogTint = value; }
             [XmlElement("applyOnLoad")] public bool ApplyOnLoad { get => ModOptions.Instance.ApplyOnLoad; set => ModOptions.Instance.ApplyOnLoad = value; }
+            [XmlElement("windowX")] public float WindowX { get => ModOptions.Instance.WindowX; set => ModOptions.Instance.WindowX = value; }
+            [XmlElement("windowY")] public float WindowY { get => ModOptions.Instance.WindowY; set => ModOptions.Instance.WindowY = value; }
         }
     }
 }
+

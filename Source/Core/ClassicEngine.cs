@@ -21,6 +21,12 @@ namespace ClassicLightFX.Core
         internal static void CloseWindow()
         {
             _open = false;
+            Options.ModOptions.SaveImmediate();
+        }
+
+        private void OnDestroy()
+        {
+            Options.ModOptions.SaveImmediate();
         }
 
         private void Start()
@@ -34,7 +40,13 @@ namespace ClassicLightFX.Core
             if (Input.GetKeyDown(KeyCode.F9))
             {
                 _open = !_open;
+                if (!_open)
+                {
+                    Options.ModOptions.SaveImmediate();
+                }
             }
+
+            Options.ModOptions.CheckPendingSave();
         }
 
         private void OnGUI()
@@ -46,3 +58,4 @@ namespace ClassicLightFX.Core
         }
     }
 }
+

@@ -33,17 +33,28 @@ mediante un ciclo de vida limpio: aplicar al cargar el mapa, revertir al salir.
 - Los valores "modernos" se capturan una sola vez al iniciar y se restauran al
   desactivar cada función.
 
-## Opciones (v2)
+## Opciones (v2.1)
 
 `swapLuts`, `sunColor`, `sunStrength`, `sunCoords`, `fogMode`, `fogTint`,
 `applyOnLoad` — todas on por defecto, persistidas en `ClassicLightFX2.xml`
 (raíz `classicLightFx`, `schema="2"`), con presets rápidos
 "All classic" / "All modern".
 
+- **Rendimiento v2.1**: Se eliminó la escritura incondicional de XML por frame en `ClassicWindow.DrawWindow`. Las operaciones de guardado ahora están estranguladas (throttle de 1.0 s) y solo se ejecutan cuando un control cambia de estado o se cierra la ventana.
+- **Posición de ventana**: Coordenadas `windowX` y `windowY` persistidas en el XML para restaurar la posición en pantalla del panel rápido F9 con verificación de límites.
+- **Identidad visual unificada**: Cabeceras con color de acento `#4FC3F7`, márgenes y espaciados estandarizados compatibles con la suite.
+
+### Integración de Suite
+
+- Entry point expone `public static bool ApplySuiteSection(string xml)` y `public static string ExportSuiteSection()`.
+- Permite a SceneFX activar o desactivar en un clic la restauración clásica al aplicar un perfil unificado `.suite.xml`.
+
 ## Arquitectura
 
 - `Core/ClassicTweaks` — aplicación y reversión de cada función.
 - `Core/LutLibrary` — carga de recursos embebidos y lectura del entorno.
 - `Core/FogModeSync`, `Core/FogTintSync` — componentes por frame de la niebla.
-- `Options/` — esquema XML v2 y panel.
+- `Options/` — esquema XML v2 con throttle y panel.
+- `UI/ClassicWindow` — panel rápido F9 con estilo unificado y posición persistida.
 - `Locale/Translator` — traducciones (EN, RU, KR, zh ×3).
+
