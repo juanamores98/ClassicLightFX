@@ -50,13 +50,13 @@ namespace ClassicLightFX.UI
             float y = 32f;
 
             y = Section("LIGHTING RESTORATION", y);
-            options.SwapLuts = Switch("Restore classic stock LUTs", options.SwapLuts, y, v => ClassicTweaks.ReplaceLuts(v)); y += 26f;
-            options.SunColor = Switch("Restore classic sun color", options.SunColor, y, v => ClassicTweaks.ReplaceSunlightColor(v)); y += 26f;
-            options.SunStrength = Switch("Restore classic sun strength", options.SunStrength, y, v => ClassicTweaks.ReplaceSunlightIntensity(v)); y += 26f;
-            options.SunCoords = Switch("Restore classic sun position", options.SunCoords, y, v => ClassicTweaks.ReplaceLatLong(v)); y += 28f;
+            options.SwapLuts = Switch("Restore classic stock LUTs", options.SwapLuts, y, v => ClassicLook.Apply(ClassicFeature.StockTables, v)); y += 26f;
+            options.SunColor = Switch("Restore classic sun color", options.SunColor, y, v => ClassicLook.Apply(ClassicFeature.SunGradient, v)); y += 26f;
+            options.SunStrength = Switch("Restore classic sun strength", options.SunStrength, y, v => ClassicLook.Apply(ClassicFeature.SunPower, v)); y += 26f;
+            options.SunCoords = Switch("Restore classic sun position", options.SunCoords, y, v => ClassicLook.Apply(ClassicFeature.SunPosition, v)); y += 28f;
 
             y = Section("FOG MODES", y);
-            options.ClassicFogMode = Switch("Prefer the classic fog effect", options.ClassicFogMode, y, v => ClassicTweaks.ReplaceFogEffect(v)); y += 26f;
+            options.ClassicFogMode = Switch("Prefer the classic fog effect", options.ClassicFogMode, y, v => ClassicLook.Apply(ClassicFeature.FogEffect, v)); y += 26f;
             options.ClassicFogTint = Switch("Classic fog tint over modern fog", options.ClassicFogTint, y, null); y += 28f;
 
             y = Section("BEHAVIOR", y);
@@ -110,11 +110,7 @@ namespace ClassicLightFX.UI
             options.ClassicFogMode = classic;
             options.ClassicFogTint = classic;
 
-            ClassicTweaks.ReplaceLuts(classic);
-            ClassicTweaks.ReplaceSunlightColor(classic);
-            ClassicTweaks.ReplaceSunlightIntensity(classic);
-            ClassicTweaks.ReplaceLatLong(classic);
-            ClassicTweaks.ReplaceFogEffect(classic);
+            ClassicLook.ApplyFromOptions();
             ModOptions.Save(true);
         }
     }

@@ -81,11 +81,12 @@ namespace ClassicLightFX
                     else if (name == "applyonload" && bool.TryParse(val, out b)) opt.ApplyOnLoad = b;
                 }
 
-                ClassicTweaks.ReplaceLuts(opt.SwapLuts);
-                ClassicTweaks.ReplaceSunlightColor(opt.SunColor);
-                ClassicTweaks.ReplaceSunlightIntensity(opt.SunStrength);
-                ClassicTweaks.ReplaceLatLong(opt.SunCoords);
-                ClassicTweaks.ReplaceFogEffect(opt.ClassicFogMode);
+                ClassicLook.Apply(ClassicFeature.StockTables, opt.SwapLuts);
+                ClassicLook.Apply(ClassicFeature.SunGradient, opt.SunColor);
+                ClassicLook.Apply(ClassicFeature.SunPower, opt.SunStrength);
+                ClassicLook.Apply(ClassicFeature.SunPosition, opt.SunCoords);
+                ClassicLook.Apply(ClassicFeature.FogEffect, opt.ClassicFogMode);
+                ClassicLook.Apply(ClassicFeature.FogTint, opt.ClassicFogTint);
 
                 ModOptions.SaveImmediate();
                 return true;
@@ -131,9 +132,10 @@ namespace ClassicLightFX
         {
             base.OnLevelLoaded(mode);
             ModOptions.Load();
+            ClassicLook.Attach();
             if (ModOptions.Instance.ApplyOnLoad)
             {
-                ClassicTweaks.SetUp();
+                ClassicLook.ApplyFromOptions();
             }
 
             DestroyHosts();
@@ -152,7 +154,13 @@ namespace ClassicLightFX
             base.OnLevelUnloading();
             UI.UuiButton.Unregister();
             DestroyHosts();
-            ClassicTweaks.CleanUp();
+            ClassicLook.Detach();
+        }
+
+        public void OnDisabled()
+        {
+            ClassicLook.Detach();
+            DestroyHosts();
         }
 
         private static void DestroyHosts()

@@ -51,9 +51,15 @@ mediante un ciclo de vida limpio: aplicar al cargar el mapa, revertir al salir.
 
 ## Arquitectura
 
-- `Core/ClassicTweaks` — aplicación y reversión de cada función.
-- `Core/LutLibrary` — carga de recursos embebidos y lectura del entorno.
-- `Core/FogModeSync`, `Core/FogTintSync` — componentes por frame de la niebla.
+- `Core/ClassicLook` — motor propio de la restauración clásica: captura un
+  baseline del estado del juego y conmuta cada función entre valores modernos
+  y valores del juego pre-After Dark (hechos del juego, no material de
+  terceros). Implementación clean-room de v2.1: estructura, nombres y
+  descomposición originales; sin recursos ni código derivado.
+- `Core/ClassicLutSynth` — tablas de color clásicas sintetizadas por código.
+- `Core/LutLibrary` — envoltura de las tablas sintetizadas y lectura del entorno.
+- `Core/ClassicFogDriver` — componente por frame de la niebla (selección de
+  efecto y tinte clásico).
 - `Options/` — esquema XML v2 con throttle y panel.
 - `UI/ClassicWindow` — panel rápido F9 con estilo unificado y posición persistida.
 - `Locale/Translator` — traducciones (EN, RU, KR, zh ×3).

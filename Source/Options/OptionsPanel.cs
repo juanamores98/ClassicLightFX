@@ -21,28 +21,28 @@ namespace ClassicLightFX.Options
             {
                 options.SwapLuts = sel;
                 ModOptions.Save();
-                ClassicTweaks.ReplaceLuts(sel);
+                ClassicLook.Apply(ClassicFeature.StockTables, sel);
             });
 
             lighting.AddCheckbox("Classic sun color", options.SunColor, sel =>
             {
                 options.SunColor = sel;
                 ModOptions.Save();
-                ClassicTweaks.ReplaceSunlightColor(sel);
+                ClassicLook.Apply(ClassicFeature.SunGradient, sel);
             });
 
             lighting.AddCheckbox("Classic sun strength", options.SunStrength, sel =>
             {
                 options.SunStrength = sel;
                 ModOptions.Save();
-                ClassicTweaks.ReplaceSunlightIntensity(sel);
+                ClassicLook.Apply(ClassicFeature.SunPower, sel);
             });
 
             lighting.AddCheckbox("Classic sun position", options.SunCoords, sel =>
             {
                 options.SunCoords = sel;
                 ModOptions.Save();
-                ClassicTweaks.ReplaceLatLong(sel);
+                ClassicLook.Apply(ClassicFeature.SunPosition, sel);
             });
 
             var fog = helper.AddGroup("Classic fog");
@@ -51,7 +51,7 @@ namespace ClassicLightFX.Options
             {
                 options.ClassicFogMode = sel;
                 ModOptions.Save();
-                ClassicTweaks.ReplaceFogEffect(sel);
+                ClassicLook.Apply(ClassicFeature.FogEffect, sel);
             });
 
             fog.AddCheckbox("Classic fog tint", options.ClassicFogTint, sel =>
@@ -83,11 +83,7 @@ namespace ClassicLightFX.Options
             options.ClassicFogTint = classic;
             ModOptions.Save();
 
-            ClassicTweaks.ReplaceLuts(classic);
-            ClassicTweaks.ReplaceSunlightColor(classic);
-            ClassicTweaks.ReplaceSunlightIntensity(classic);
-            ClassicTweaks.ReplaceLatLong(classic);
-            ClassicTweaks.ReplaceFogEffect(classic);
+            ClassicLook.ApplyFromOptions();
         }
     }
 }
