@@ -12,7 +12,7 @@ mediante un ciclo de vida limpio: aplicar al cargar el mapa, revertir al salir.
 
 | Elemento | Valor clásico |
 |---|---|
-| LUTs por bioma | Temperate, European, Boreal, Tropical, Winter (embebidos como recursos del ensamblado) |
+| LUTs por bioma | Temperate, European, Boreal, Tropical, Winter (sintetizadas proceduralmente en `ClassicLutSynth`; sin recursos externos embebidos) |
 | Intensidad solar | 3.3187 |
 | Exposición | 1.0 |
 | Coordenadas por entorno | Europa → Londres; Norte → Estocolmo; Sunny → Malta; Tropical → La Meca |

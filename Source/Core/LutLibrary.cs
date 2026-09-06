@@ -6,42 +6,18 @@ using ColossalFramework;
 namespace ClassicLightFX.Core
 {
     /// <summary>
-    /// Loads the classic LUT textures embedded in the assembly and reads the
-    /// active map environment.
+    /// Generates the classic-look color tables procedurally and reads the
+    /// active map environment. No external texture is embedded or derived.
     /// </summary>
     internal static class LutLibrary
     {
-        internal static Texture3DWrapper Load(string resourceName, string name)
+        internal static Texture3DWrapper Synthesize(string name)
         {
-            var flat = LoadTextureFromAssembly(resourceName);
-            flat.name = name;
-
+            var volume = ClassicLutSynth.Generate(name);
             var wrapper = ScriptableObject.CreateInstance<Texture3DWrapper>();
             wrapper.name = name;
-            wrapper.texture = Texture3DWrapper.Convert(flat);
+            wrapper.texture = volume;
             return wrapper;
-        }
-
-        private static Texture2D LoadTextureFromAssembly(string path)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            using (var stream = assembly.GetManifestResourceStream(path))
-            {
-                if (stream == null)
-                {
-                    throw new ArgumentException("Embedded resource not found: " + path);
-                }
-
-                var buffer = new byte[stream.Length];
-                stream.Read(buffer, 0, buffer.Length);
-
-                var texture = new Texture2D(2, 2, TextureFormat.ARGB32, false);
-                texture.LoadImage(buffer);
-                // The wrapper conversion below reads the pixels back, so the
-                // texture must stay readable (makeNoLongerReadable: false).
-                texture.Apply(false, false);
-                return texture;
-            }
         }
 
         internal static string GetEnvironment()

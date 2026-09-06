@@ -68,8 +68,11 @@ namespace ClassicLightFX.Core
         internal static void SetUp()
         {
             _dayNightProperties = Object.FindObjectOfType<DayNightProperties>();
-            Object.FindObjectOfType<RenderProperties>().m_sun =
-                _dayNightProperties.sunLightSource.transform; // fix sun position in some environments
+            var renderProperties = Object.FindObjectOfType<RenderProperties>();
+            if (_dayNightProperties != null && renderProperties != null && _dayNightProperties.sunLightSource != null)
+            {
+                renderProperties.m_sun = _dayNightProperties.sunLightSource.transform;
+            }
 
             Reset();
 
@@ -155,10 +158,13 @@ namespace ClassicLightFX.Core
             }
 
             // Force the color correction pipeline to rebind the swapped LUTs.
-            int size = manager.items.Length;
-            int lastSelection = manager.lastSelection;
-            manager.currentSelection = (lastSelection + 1) % size;
-            manager.currentSelection = lastSelection;
+            int size = manager.items != null ? manager.items.Length : 0;
+            if (size > 0)
+            {
+                int lastSelection = manager.lastSelection;
+                manager.currentSelection = (lastSelection + 1) % size;
+                manager.currentSelection = lastSelection;
+            }
         }
 
         private static Texture3DWrapper GetReplacementLut(bool toClassic, string builtinLutName, Texture3DWrapper builtinLut)
@@ -167,27 +173,27 @@ namespace ClassicLightFX.Core
             {
                 case Europe:
                     if (_europeanAd == null) _europeanAd = builtinLut;
-                    if (_europeanClassic == null) _europeanClassic = LutLibrary.Load("ClassicLightFX.LUTs.EuropeanClassic.png", Europe);
+                    if (_europeanClassic == null) _europeanClassic = LutLibrary.Synthesize(Europe);
                     return toClassic ? _europeanClassic : _europeanAd;
 
                 case Tropical:
                     if (_tropicalAd == null) _tropicalAd = builtinLut;
-                    if (_tropicalClassic == null) _tropicalClassic = LutLibrary.Load("ClassicLightFX.LUTs.TropicalClassic.png", Tropical);
+                    if (_tropicalClassic == null) _tropicalClassic = LutLibrary.Synthesize(Tropical);
                     return toClassic ? _tropicalClassic : _tropicalAd;
 
                 case North:
                     if (_northAd == null) _northAd = builtinLut;
-                    if (_northClassic == null) _northClassic = LutLibrary.Load("ClassicLightFX.LUTs.BorealClassic.png", North);
+                    if (_northClassic == null) _northClassic = LutLibrary.Synthesize(North);
                     return toClassic ? _northClassic : _northAd;
 
                 case Sunny:
                     if (_sunnyAd == null) _sunnyAd = builtinLut;
-                    if (_sunnyClassic == null) _sunnyClassic = LutLibrary.Load("ClassicLightFX.LUTs.TemperateClassic.png", Sunny);
+                    if (_sunnyClassic == null) _sunnyClassic = LutLibrary.Synthesize(Sunny);
                     return toClassic ? _sunnyClassic : _sunnyAd;
 
                 case Winter:
                     if (_winterAd == null) _winterAd = builtinLut;
-                    if (_winterClassic == null) _winterClassic = LutLibrary.Load("ClassicLightFX.LUTs.WinterClassic.png", Winter);
+                    if (_winterClassic == null) _winterClassic = LutLibrary.Synthesize(Winter);
                     return toClassic ? _winterClassic : _winterAd;
 
                 default:

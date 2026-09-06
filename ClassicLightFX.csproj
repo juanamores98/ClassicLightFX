@@ -20,10 +20,6 @@
         <Reference Include="UnityEngine" />
     </ItemGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Include="LUTs\*.png" />
-    </ItemGroup>
-
     <Target Name="DeployToModDirectory" AfterTargets="Build">
         <PropertyGroup>
             <DeployDir>$(LOCALAPPDATA)/Colossal Order/Cities_Skylines/Addons/Mods/ClassicLightFX/</DeployDir>
