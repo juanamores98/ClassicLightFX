@@ -53,6 +53,13 @@ dotnet build -c Release
 
 El build despliega DLL + `Locale/` automáticamente.
 
+## Arquitectura
+
+El documento ejecutivo con la arquitectura, la API de suite, las rutas de
+configuración y los cambios de cada ciclo está en
+[`ARQUITECTURA.md`](ARQUITECTURA.md). `DESIGN.md` conserva la especificación
+funcional original.
+
 ## Licencia
 
 [MIT-0](https://spdx.org/licenses/MIT-0.html) (MIT No Attribution) © 2026 juanamores98.
