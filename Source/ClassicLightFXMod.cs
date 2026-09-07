@@ -1,4 +1,4 @@
-using ICities;
+﻿using ICities;
 using ClassicLightFX.Core;
 using ClassicLightFX.Options;
 
@@ -78,6 +78,7 @@ namespace ClassicLightFX
                     else if (name == "suncoords" && bool.TryParse(val, out b)) opt.SunCoords = b;
                     else if (name == "classicfogmode" && bool.TryParse(val, out b)) opt.ClassicFogMode = b;
                     else if (name == "classicfogtint" && bool.TryParse(val, out b)) opt.ClassicFogTint = b;
+                    else if (name == "classicfogwithcycle" && bool.TryParse(val, out b)) opt.ClassicFogWithCycle = b;
                     else if (name == "applyonload" && bool.TryParse(val, out b)) opt.ApplyOnLoad = b;
                 }
 
@@ -109,6 +110,7 @@ namespace ClassicLightFX
                 "    <sunCoords>{3}</sunCoords>\n" +
                 "    <classicFogMode>{4}</classicFogMode>\n" +
                 "    <classicFogTint>{5}</classicFogTint>\n" +
+                "    <classicFogWithCycle>{7}</classicFogWithCycle>\n" +
                 "    <applyOnLoad>{6}</applyOnLoad>\n" +
                 "  </classiclightfx>",
                 opt.SwapLuts.ToString().ToLowerInvariant(),
@@ -117,7 +119,8 @@ namespace ClassicLightFX
                 opt.SunCoords.ToString().ToLowerInvariant(),
                 opt.ClassicFogMode.ToString().ToLowerInvariant(),
                 opt.ClassicFogTint.ToString().ToLowerInvariant(),
-                opt.ApplyOnLoad.ToString().ToLowerInvariant());
+                opt.ApplyOnLoad.ToString().ToLowerInvariant(),
+                opt.ClassicFogWithCycle.ToString().ToLowerInvariant());
         }
     }
 

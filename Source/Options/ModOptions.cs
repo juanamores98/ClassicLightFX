@@ -63,6 +63,16 @@ namespace ClassicLightFX.Options
         internal bool SunCoords = true;
         internal bool ClassicFogMode = true;
         internal bool ClassicFogTint = true;
+        /// <summary>
+        /// Si el efecto de niebla clasico se mantiene con el ciclo dia/noche activo.
+        /// </summary>
+        /// <remarks>
+        /// El original tenia este interruptor y aqui estaba fijo en "no": de noche y con ciclo,
+        /// la niebla clasica se apagaba sola sin que nadie pudiera evitarlo. Era el unico
+        /// ajuste de Daylight Classic que no tenia equivalente.
+        /// </remarks>
+        internal bool ClassicFogWithCycle;
+
         internal bool ApplyOnLoad = true;
         internal float WindowX = 920f;
         internal float WindowY = 140f;
@@ -147,6 +157,7 @@ namespace ClassicLightFX.Options
             [XmlElement("sunCoords")] public bool SunCoords { get => ModOptions.Instance.SunCoords; set => ModOptions.Instance.SunCoords = value; }
             [XmlElement("fogMode")] public bool ClassicFogMode { get => ModOptions.Instance.ClassicFogMode; set => ModOptions.Instance.ClassicFogMode = value; }
             [XmlElement("fogTint")] public bool ClassicFogTint { get => ModOptions.Instance.ClassicFogTint; set => ModOptions.Instance.ClassicFogTint = value; }
+            [XmlElement("classicFogWithCycle")] public bool ClassicFogWithCycle { get => ModOptions.Instance.ClassicFogWithCycle; set => ModOptions.Instance.ClassicFogWithCycle = value; }
             [XmlElement("applyOnLoad")] public bool ApplyOnLoad { get => ModOptions.Instance.ApplyOnLoad; set => ModOptions.Instance.ApplyOnLoad = value; }
             [XmlElement("windowX")] public float WindowX { get => ModOptions.Instance.WindowX; set => ModOptions.Instance.WindowX = value; }
             [XmlElement("windowY")] public float WindowY { get => ModOptions.Instance.WindowY; set => ModOptions.Instance.WindowY = value; }

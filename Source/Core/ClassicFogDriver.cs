@@ -142,7 +142,10 @@ namespace ClassicLightFX.Core
             bool cycleEnabled = simulation.m_enableDayNight;
             bool night = simulation.m_isNightTime;
 
-            bool useLegacy = wantsClassic && (!cycleEnabled || !night);
+            // El original tenia un interruptor para esto y aqui estaba fijo: permitir o no el
+            // efecto de niebla clasico cuando el ciclo dia/noche esta activo.
+            bool allowWithCycle = ModOptions.Instance.ClassicFogWithCycle;
+            bool useLegacy = wantsClassic && (allowWithCycle || !cycleEnabled || !night);
             if (useLegacy != _lastLegacyChoice || cycleEnabled != _lastCycleState || night != _lastNightState)
             {
                 EnableLegacyFog(useLegacy);

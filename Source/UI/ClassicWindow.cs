@@ -58,7 +58,9 @@ namespace ClassicLightFX.UI
             y = Section("FOG MODES", y);
             options.ClassicFogMode = Switch("Prefer the classic fog effect", options.ClassicFogMode, y, v => ClassicLook.Apply(ClassicFeature.FogEffect, v)); y += 26f;
             options.ClassicFogTint = Switch("Classic fog tint over modern fog", options.ClassicFogTint, y,
-                v => ClassicLook.Apply(ClassicFeature.FogTint, v)); y += 28f;
+                v => ClassicLook.Apply(ClassicFeature.FogTint, v)); y += 26f;
+            options.ClassicFogWithCycle = Switch("Keep classic fog with the day/night cycle on",
+                options.ClassicFogWithCycle, y, v => ClassicLook.Apply(ClassicFeature.FogEffect, v)); y += 28f;
 
             y = Section("BEHAVIOR", y);
             bool applyOnLoad = GUI.Toggle(new Rect(10f, y, 400f, 24f), options.ApplyOnLoad, " Apply the saved profile when a map loads");

@@ -64,6 +64,13 @@ namespace ClassicLightFX.Options
                 ClassicLook.Apply(ClassicFeature.FogTint, sel);
             });
 
+            fog.AddCheckbox("Keep classic fog with the day/night cycle on", options.ClassicFogWithCycle, sel =>
+            {
+                options.ClassicFogWithCycle = sel;
+                ModOptions.Save();
+                ClassicLook.Apply(ClassicFeature.FogEffect, options.ClassicFogMode);
+            });
+
             var quick = helper.AddGroup("One click");
 
             quick.AddButton("Vanilla (leave the game untouched)", () => QuickPresets.ApplyVanilla());
