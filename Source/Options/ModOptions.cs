@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ColossalFramework.IO;
+using System;
 using System.IO;
 using System.Xml.Serialization;
 using UnityEngine;
@@ -19,7 +20,40 @@ namespace ClassicLightFX.Options
     /// </remarks>
     public sealed class ModOptions
     {
+                /// <remarks>
+        /// <b>Ruta completa, no relativa.</b> Un nombre suelto lo resuelve .NET contra el
+        /// directorio de trabajo del proceso, que en Cities: Skylines es la carpeta de
+        /// instalacion del juego. Ahi acababan estos XML: dentro de Archivos de Programa, donde
+        /// escribir suele requerir permisos y donde una verificacion de Steam puede borrarlos.
+        /// Se midio en partida —los cuatro archivos aparecieron en la carpeta del juego— y solo
+        /// LumenFX lo hacia bien.
+        ///
+        /// <b>La migracion.</b> Si queda un archivo en el sitio antiguo y todavia no hay uno en
+        /// el nuevo, se lee el antiguo: nadie pierde su configuracion por arreglar esto.
+        /// </remarks>
         private static readonly string FileName = "ClassicLightFX2.xml";
+
+        private static string OptionsPath
+        {
+            get { return Path.Combine(DataLocation.localApplicationData, "ClassicLightFX2.xml"); }
+        }
+
+        /// <summary>El sitio antiguo: la carpeta de trabajo del proceso.</summary>
+        private static string OptionsPathLegacy
+        {
+            get { return "ClassicLightFX2.xml"; }
+        }
+
+        /// <summary>De donde leer: el sitio nuevo si existe, y si no el antiguo.</summary>
+        private static string OptionsPathToRead
+        {
+            get
+            {
+                return File.Exists(OptionsPath) || !File.Exists(OptionsPathLegacy)
+                    ? OptionsPath
+                    : OptionsPathLegacy;
+            }
+        }
 
         internal static readonly ModOptions Instance = new ModOptions();
 
@@ -44,12 +78,12 @@ namespace ClassicLightFX.Options
         {
             try
             {
-                if (!File.Exists(FileName))
+                if (!File.Exists(OptionsPathToRead))
                 {
                     return;
                 }
 
-                using (var reader = new StreamReader(FileName))
+                using (var reader = new StreamReader(OptionsPathToRead))
                 {
                     var serializer = new XmlSerializer(typeof(OptionsDocument));
                     if (serializer.Deserialize(reader) is OptionsDocument)
@@ -90,7 +124,7 @@ namespace ClassicLightFX.Options
             _lastSaveTime = Time.realtimeSinceStartup;
             try
             {
-                using (var writer = new StreamWriter(FileName))
+                using (var writer = new StreamWriter(OptionsPath))
                 {
                     new XmlSerializer(typeof(OptionsDocument)).Serialize(writer, new OptionsDocument());
                 }
