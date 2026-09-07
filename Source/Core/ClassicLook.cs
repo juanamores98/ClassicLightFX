@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using ColossalFramework;
 using ClassicLightFX.Options;
@@ -54,6 +54,8 @@ namespace ClassicLightFX.Core
             internal float SunExposure;
             internal float Latitude;
             internal float Longitude;
+            internal Color SkyTint;
+            internal Vector3 WaveLengths;
         }
 
         internal static bool Attached
@@ -81,6 +83,8 @@ namespace ClassicLightFX.Core
                 SunExposure = dayNight.m_Exposure,
                 Latitude = dayNight.m_Latitude,
                 Longitude = dayNight.m_Longitude,
+                SkyTint = dayNight.m_SkyTint,
+                WaveLengths = dayNight.m_WaveLengths,
             };
             _warnedNotAttached = false;
 
@@ -88,6 +92,10 @@ namespace ClassicLightFX.Core
             {
                 _driverHost = new GameObject("ClassicLightFX.FogDriver");
                 _fogDriver = _driverHost.AddComponent<ClassicFogDriver>();
+
+                // La referencia del tinte se toma aqui, con el resto y antes de aplicar nada,
+                // no cuando al driver le toque su primer fotograma.
+                _fogDriver.AdoptBaseline(_baseline.SkyTint, _baseline.WaveLengths);
             }
         }
 

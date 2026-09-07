@@ -42,6 +42,27 @@ namespace ClassicLightFX.Core
         // aunque el driver no hubiese tocado nada en toda la partida.
         private bool _tintEverApplied;
 
+        /// <summary>
+        /// Recibe el tinte atmosferico con el que se encontro el mapa.
+        /// </summary>
+        /// <remarks>
+        /// <b>Por que se lo pasan y no lo toma el.</b> Antes lo capturaba en su primer
+        /// <c>Update</c>, que ocurre un fotograma despues de que <c>ClassicLook</c> ya haya
+        /// aplicado las opciones. Si para entonces el tinte clasico ya estaba puesto, el driver
+        /// guardaba ese como "el moderno", y apagarlo despues no devolvia nada: reponia el mismo
+        /// valor clasico. Se midio en partida: <c>m_SkyTint</c> se quedaba en 0.40784 aunque se
+        /// apagaran todos los interruptores.
+        ///
+        /// Ahora la referencia se toma en <c>Attach</c>, junto al resto de la linea base y antes
+        /// de que nadie escriba, y se le entrega aqui.
+        /// </remarks>
+        internal void AdoptBaseline(Color skyTint, Vector3 waveLengths)
+        {
+            _modernSkyTint = skyTint;
+            _modernWavelengths = waveLengths;
+            _tintCaptured = true;
+        }
+
         public void Awake()
         {
             Resolve();
@@ -95,8 +116,12 @@ namespace ClassicLightFX.Core
                 _dayNight = Object.FindObjectOfType<DayNightProperties>();
             }
 
+            // Si nadie le dio la referencia, la toma el mismo. Es el camino de respaldo:
+            // el bueno es que se la pasen desde Attach, antes de que nada haya escrito.
             if (_dayNight != null && !_tintCaptured)
             {
+                Debug.LogWarning("[ClassicLightFX] el driver de niebla capturo el tinte por su "
+                    + "cuenta; el valor puede no ser el original del mapa.");
                 _modernSkyTint = _dayNight.m_SkyTint;
                 _modernWavelengths = _dayNight.m_WaveLengths;
                 _tintCaptured = true;

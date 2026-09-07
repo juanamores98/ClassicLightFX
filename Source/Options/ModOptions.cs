@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Xml.Serialization;
 using UnityEngine;
@@ -8,7 +8,16 @@ namespace ClassicLightFX.Options
     /// <summary>
     /// v2 option set. Element names and defaults belong to this version.
     /// </summary>
-    internal sealed class ModOptions
+    /// <remarks>
+    /// <b>Publica por obligacion, no por gusto.</b> XmlSerializer exige que el tipo que
+    /// serializa y todos los que lo contienen sean publicos. Con esta clase en internal, su
+    /// <see cref="OptionsDocument"/> anidado quedaba inaccesible para el serializador, y tanto
+    /// Load como Save lanzaban en cada intento: el mod no llego nunca a guardar sus opciones.
+    /// Se midio en partida —diecinueve excepciones en una sola tanda del lab— y no se habia
+    /// visto antes porque las dos rutas se tragan la excepcion y siguen con los valores por
+    /// defecto, que es exactamente lo que hace que el sintoma parezca otra cosa.
+    /// </remarks>
+    public sealed class ModOptions
     {
         private static readonly string FileName = "ClassicLightFX2.xml";
 
