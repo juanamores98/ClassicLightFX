@@ -180,7 +180,10 @@ namespace ClassicLightFX.Core
             Color targetTint = Color.Lerp(_modernSkyTint, ClassicSkyTint, ramp);
             Vector3 targetWavelengths = Vector3.Lerp(_modernWavelengths, ClassicWavelengths, ramp);
 
-            if (_dayNight.m_SkyTint != targetTint)
+            // El tinte del cielo es del tema del mapa cuando hay quien lo administre. Las
+            // longitudes de onda no las administra nadie mas, asi que esas si se aplican: el
+            // efecto clasico queda a medias, y eso es preferible a pisar el tema.
+            if (!ThemeOwnership.AtmosphereIsManaged && _dayNight.m_SkyTint != targetTint)
             {
                 _dayNight.m_SkyTint = targetTint;
             }
@@ -232,7 +235,11 @@ namespace ClassicLightFX.Core
         {
             if (_dayNight != null && _tintCaptured && _tintEverApplied)
             {
-                _dayNight.m_SkyTint = _modernSkyTint;
+                if (!ThemeOwnership.AtmosphereIsManaged)
+                {
+                    _dayNight.m_SkyTint = _modernSkyTint;
+                }
+
                 _dayNight.m_WaveLengths = _modernWavelengths;
                 _tintEverApplied = false;
             }

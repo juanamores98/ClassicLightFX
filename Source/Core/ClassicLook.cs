@@ -124,6 +124,7 @@ namespace ClassicLightFX.Core
 
             _tablesSwapped = false;
             ModernTableBackup.Clear();
+            ThemeOwnership.Forget();
         }
 
         internal static void Apply(ClassicFeature feature, bool classic)
@@ -157,7 +158,13 @@ namespace ClassicLightFX.Core
 
                 case ClassicFeature.SunPower:
                     dayNight.m_SunIntensity = classic ? ClassicSunPower : _baseline.SunPower;
-                    dayNight.m_Exposure = classic ? ClassicSunExposure : _baseline.SunExposure;
+
+                    // La exposicion es del tema del mapa cuando hay quien lo administre.
+                    if (!ThemeOwnership.AtmosphereIsManaged)
+                    {
+                        dayNight.m_Exposure = classic ? ClassicSunExposure : _baseline.SunExposure;
+                    }
+
                     break;
 
                 case ClassicFeature.SunPosition:
@@ -188,6 +195,14 @@ namespace ClassicLightFX.Core
 
         private static void ApplySunPosition(DayNightProperties dayNight, bool classic)
         {
+            // Las coordenadas son del tema del mapa cuando hay quien lo administre. Reponer
+            // las capturadas seria peor que no tocarlas: se capturaron antes de que el tema
+            // aplicara las suyas.
+            if (ThemeOwnership.AtmosphereIsManaged)
+            {
+                return;
+            }
+
             if (!classic)
             {
                 dayNight.m_Latitude = _baseline.Latitude;
