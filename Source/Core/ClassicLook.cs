@@ -159,8 +159,8 @@ namespace ClassicLightFX.Core
                 case ClassicFeature.SunPower:
                     dayNight.m_SunIntensity = classic ? ClassicSunPower : _baseline.SunPower;
 
-                    // La exposicion es del tema del mapa cuando hay quien lo administre.
-                    if (!ThemeOwnership.AtmosphereIsManaged)
+                    // Igual que arriba: aplicar lo clásico sí; devolver lo capturado, no.
+                    if (classic || !ThemeOwnership.AtmosphereIsManaged)
                     {
                         dayNight.m_Exposure = classic ? ClassicSunExposure : _baseline.SunExposure;
                     }
@@ -195,10 +195,10 @@ namespace ClassicLightFX.Core
 
         private static void ApplySunPosition(DayNightProperties dayNight, bool classic)
         {
-            // Las coordenadas son del tema del mapa cuando hay quien lo administre. Reponer
-            // las capturadas seria peor que no tocarlas: se capturaron antes de que el tema
-            // aplicara las suyas.
-            if (ThemeOwnership.AtmosphereIsManaged)
+            // Poner las coordenadas clásicas es una petición expresa y se atiende. Lo que no
+            // se hace, con un gestor de temas presente, es devolver las capturadas: se
+            // capturaron antes de que el tema aplicara las suyas, y devolverlas lo borraría.
+            if (!classic && ThemeOwnership.AtmosphereIsManaged)
             {
                 return;
             }

@@ -58,7 +58,16 @@ namespace ClassicLightFX.Options
             {
                 options.ClassicFogTint = sel;
                 ModOptions.Save();
+
+                // Era el unico interruptor que cambiaba la opcion sin pedir que se aplicara:
+                // habia que tocar otra cosa para que surtiera efecto.
+                ClassicLook.Apply(ClassicFeature.FogTint, sel);
             });
+
+            var quick = helper.AddGroup("One click");
+
+            quick.AddButton("Vanilla (leave the game untouched)", () => QuickPresets.ApplyVanilla());
+            quick.AddButton("Optimized (the calibrated recipe)", () => QuickPresets.ApplyOptimized());
 
             var general = helper.AddGroup("General");
 

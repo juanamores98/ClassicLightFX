@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using ClassicLightFX.Core;
 using ClassicLightFX.Options;
 
@@ -10,6 +10,17 @@ namespace ClassicLightFX.UI
     /// </summary>
     internal sealed class ClassicWindow
     {
+        /// <summary>
+        /// Alto que ocupo el contenido la ultima vez que se dibujo.
+        /// </summary>
+        /// <remarks>
+        /// Las ventanas tenian un alto fijo escrito a mano. Al crecer el contenido, lo ultimo
+        /// —que suele ser un boton— quedaba fuera del recorte y no habia forma de pulsarlo.
+        /// Medirlo mientras se dibuja y ajustar la ventana en el siguiente fotograma cuesta un
+        /// fotograma de retraso y ningun numero que mantener a mano.
+        /// </remarks>
+        private float _contentHeight;
+
         private Rect _rect;
 
         internal ClassicWindow()
@@ -29,6 +40,12 @@ namespace ClassicLightFX.UI
         {
             float oldX = _rect.x;
             float oldY = _rect.y;
+            // Que quepa lo que haya, sin salirse de la pantalla.
+            if (_contentHeight > 0f)
+            {
+                _rect.height = Mathf.Min(_contentHeight + 12f, Screen.height - 60f);
+            }
+
             _rect = GUI.Window(id, _rect, DrawWindow, "ClassicLightFX v2");
             if (!Mathf.Approximately(oldX, _rect.x) || !Mathf.Approximately(oldY, _rect.y))
             {
@@ -57,7 +74,8 @@ namespace ClassicLightFX.UI
 
             y = Section("FOG MODES", y);
             options.ClassicFogMode = Switch("Prefer the classic fog effect", options.ClassicFogMode, y, v => ClassicLook.Apply(ClassicFeature.FogEffect, v)); y += 26f;
-            options.ClassicFogTint = Switch("Classic fog tint over modern fog", options.ClassicFogTint, y, null); y += 28f;
+            options.ClassicFogTint = Switch("Classic fog tint over modern fog", options.ClassicFogTint, y,
+                v => ClassicLook.Apply(ClassicFeature.FogTint, v)); y += 28f;
 
             y = Section("BEHAVIOR", y);
             bool applyOnLoad = GUI.Toggle(new Rect(10f, y, 400f, 24f), options.ApplyOnLoad, " Apply the saved profile when a map loads");
@@ -77,6 +95,20 @@ namespace ClassicLightFX.UI
             {
                 SetAll(false);
             }
+
+            y += 32f;
+
+            if (GUI.Button(new Rect(10f, y, 200f, 26f), "Vanilla"))
+            {
+                QuickPresets.ApplyVanilla();
+            }
+
+            if (GUI.Button(new Rect(220f, y, 200f, 26f), "Optimized"))
+            {
+                QuickPresets.ApplyOptimized();
+            }
+
+            _contentHeight = y + 32f;
         }
 
         private static float Section(string title, float y)
