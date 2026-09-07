@@ -37,6 +37,11 @@ namespace ClassicLightFX.Core
         private bool _lastNightState;
         private bool _lastTintActive;
 
+        // Cierto solo si este driver llego a escribir el tinte alguna vez. Sin esto, apagar
+        // el mod escribia su idea de "moderno" sobre lo que hubiera puesto el tema del mapa,
+        // aunque el driver no hubiese tocado nada en toda la partida.
+        private bool _tintEverApplied;
+
         public void Awake()
         {
             Resolve();
@@ -161,6 +166,7 @@ namespace ClassicLightFX.Core
             }
 
             _lastTintActive = true;
+            _tintEverApplied = true;
         }
 
         private static float DaylightRamp(float normalizedDay)
@@ -199,10 +205,11 @@ namespace ClassicLightFX.Core
 
         private void RestoreModernTint()
         {
-            if (_dayNight != null && _tintCaptured)
+            if (_dayNight != null && _tintCaptured && _tintEverApplied)
             {
                 _dayNight.m_SkyTint = _modernSkyTint;
                 _dayNight.m_WaveLengths = _modernWavelengths;
+                _tintEverApplied = false;
             }
         }
     }
