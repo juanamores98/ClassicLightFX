@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace ClassicLightFX.Core
 {
@@ -22,6 +22,11 @@ namespace ClassicLightFX.Core
 
             var tex = new Texture3D(Size, Size, Size, TextureFormat.RGBA32, false);
             tex.name = "ClassicLightFX." + builtinLutName;
+
+            // Una tabla de color se muestrea hasta sus bordes. Con el modo de repeticion por
+            // defecto, el negro absoluto tomaria muestras del extremo blanco del cubo.
+            tex.wrapMode = TextureWrapMode.Clamp;
+            tex.filterMode = FilterMode.Bilinear;
 
             var pixels = new Color[Size * Size * Size];
             int index = 0;

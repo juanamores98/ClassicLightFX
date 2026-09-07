@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using ColossalFramework;
 using ClassicLightFX.Options;
 
@@ -24,6 +24,14 @@ namespace ClassicLightFX.Core
         private Vector3 _modernWavelengths = Vector3.zero;
         private bool _tintCaptured;
 
+        // Estado con el que se encontro cada componente de niebla. Al parar hay que devolver
+        // esto y no una eleccion propia: AtmosphereFX tambien decide sobre los dos, y forzar
+        // "el moderno encendido" le pisaria su configuracion al descargar el mapa.
+        private bool _modernLayeredEnabled;
+        private bool _modernLegacyEnabled;
+        private bool _layeredStateCaptured;
+        private bool _legacyStateCaptured;
+
         private bool _lastLegacyChoice;
         private bool _lastCycleState;
         private bool _lastNightState;
@@ -44,13 +52,13 @@ namespace ClassicLightFX.Core
         public void Shutdown()
         {
             RestoreModernTint();
-            EnableLegacyFog(false);
+            RestoreFogComponents();
         }
 
         private void OnDestroy()
         {
             RestoreModernTint();
-            EnableLegacyFog(false);
+            RestoreFogComponents();
         }
 
         private void Resolve()
@@ -60,9 +68,21 @@ namespace ClassicLightFX.Core
                 _layeredFog = Object.FindObjectOfType<DayNightFogEffect>();
             }
 
+            if (_layeredFog != null && !_layeredStateCaptured)
+            {
+                _modernLayeredEnabled = _layeredFog.enabled;
+                _layeredStateCaptured = true;
+            }
+
             if (_legacyFog == null)
             {
                 _legacyFog = Object.FindObjectOfType<FogEffect>();
+            }
+
+            if (_legacyFog != null && !_legacyStateCaptured)
+            {
+                _modernLegacyEnabled = _legacyFog.enabled;
+                _legacyStateCaptured = true;
             }
 
             if (_dayNight == null)
@@ -160,6 +180,20 @@ namespace ClassicLightFX.Core
             if (_layeredFog != null)
             {
                 _layeredFog.enabled = !legacy;
+            }
+        }
+
+        /// <summary>Devuelve los dos componentes de niebla al estado en que se encontraron.</summary>
+        private void RestoreFogComponents()
+        {
+            if (_legacyFog != null && _legacyStateCaptured)
+            {
+                _legacyFog.enabled = _modernLegacyEnabled;
+            }
+
+            if (_layeredFog != null && _layeredStateCaptured)
+            {
+                _layeredFog.enabled = _modernLayeredEnabled;
             }
         }
 
