@@ -10,17 +10,6 @@ namespace ClassicLightFX.UI
     /// </summary>
     internal sealed class ClassicWindow
     {
-        /// <summary>
-        /// Alto que ocupo el contenido la ultima vez que se dibujo.
-        /// </summary>
-        /// <remarks>
-        /// Las ventanas tenian un alto fijo escrito a mano. Al crecer el contenido, lo ultimo
-        /// —que suele ser un boton— quedaba fuera del recorte y no habia forma de pulsarlo.
-        /// Medirlo mientras se dibuja y ajustar la ventana en el siguiente fotograma cuesta un
-        /// fotograma de retraso y ningun numero que mantener a mano.
-        /// </remarks>
-        private float _contentHeight;
-
         private Rect _rect;
 
         internal ClassicWindow()
@@ -33,19 +22,13 @@ namespace ClassicLightFX.UI
                 x = Mathf.Clamp(x, 10f, Mathf.Max(10f, Screen.width - 440f));
                 y = Mathf.Clamp(y, 10f, Mathf.Max(10f, Screen.height - 380f));
             }
-            _rect = new Rect(x, y, 430f, 360f);
+            _rect = new Rect(x, y, 430f, 410f);
         }
 
         internal void Draw(int id)
         {
             float oldX = _rect.x;
             float oldY = _rect.y;
-            // Que quepa lo que haya, sin salirse de la pantalla.
-            if (_contentHeight > 0f)
-            {
-                _rect.height = Mathf.Min(_contentHeight + 12f, Screen.height - 60f);
-            }
-
             _rect = GUI.Window(id, _rect, DrawWindow, "ClassicLightFX v2");
             if (!Mathf.Approximately(oldX, _rect.x) || !Mathf.Approximately(oldY, _rect.y))
             {
@@ -108,7 +91,6 @@ namespace ClassicLightFX.UI
                 QuickPresets.ApplyOptimized();
             }
 
-            _contentHeight = y + 32f;
         }
 
         private static float Section(string title, float y)
