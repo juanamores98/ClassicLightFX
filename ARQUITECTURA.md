@@ -1,115 +1,58 @@
-# ClassicLightFX — arquitectura y cambios
+# Arquitectura actual de ClassicLightFX
 
-Documento ejecutivo. Estado a día de hoy. `DESIGN.md` es la especificación
-funcional original y `PROCEDENCIA.md` la evidencia de origen de cada pieza; este
-documento describe cómo está construido el mod hoy y qué cambió en el último
-ciclo.
+Revisión 2026-09-08. El historial conserva la descripción anterior de ventanas y presets.
 
-## Qué hace
+## Recorrido
 
-Devuelve el aspecto de Cities: Skylines anterior a *After Dark* (2015): las
-tablas de color de entonces, el color y la intensidad del sol de entonces, sus
-coordenadas, y el shader de niebla clásico. Cada pieza es un interruptor
-independiente, y las tres combinaciones que la gente suele querer están como
-botones de un clic.
+1. Entrada del mod y anfitrión: configuración global y servicios del nivel.
+2. Modelo: `Options/ModOptions.cs` y su `OptionsDocument` temporal. El XML se lee en un documento temporal validado antes de copiarlo al estado vivo.
+3. Motor: `Core/ClassicLook.cs`, `ClassicFogDriver.cs` y `ClassicLutSynth.cs`. Captura antes de escribir; limpia referencias y caches al descargar.
+4. `FxModule` expone estado y panel. `UI/PanelView.cs` contiene disposición vertical, controles nativos y refresco sin escribir.
+5. `Infrastructure/FxStorage.cs` proporciona escritura segura, validación de finitos y reconocimiento de la receta; `FxInterop.cs` consulta reclamaciones sin dependencia obligatoria del compañero.
 
-## Piezas
+VANILLA es una suspensión persistente. OPTIMIZED desactiva todos los efectos clásicos, como el DEFAULT de referencia. ApplyOnLoad=false deja de activar la niebla. Se respeta al dueño activo de iluminación/niebla y se sustituye la tabla solar de ocho claves de procedencia incierta por una transformación del gradiente capturado.
 
-```
-Source/
-  ClassicLightFXMod.cs        IUserMod + API de suite (8 etiquetas)
-  Core/
-    ClassicLook.cs            el conmutador: una función por característica
-    ClassicFogDriver.cs       decide cuándo vale el efecto de niebla clásico
-    ClassicLutSynth.cs        sintetiza las tablas, no las copia
-    ClassicEngine.cs          MonoBehaviour anfitrión, F9
-    LutLibrary.cs             tablas por bioma
-    ThemeOwnership.cs         cede a Theme Mixer lo que es suyo
-    QuickPresets.cs           Vanilla y Optimized de un clic
-  Options/
-    ModOptions.cs             el estado, público para que XmlSerializer lo vea
-    OptionsPanel.cs           opciones dentro del menú del juego
-  UI/ClassicWindow.cs         ventana IMGUI
-  Locale/                     traducciones
-```
+## Modos
 
-### Las tablas son sintetizadas, no copiadas
+VANILLA suspende el módulo y devuelve los campos escritos a su referencia previa cuando le corresponde. No equivale a aplicar constantes supuestamente neutras. Conserva el modo en el archivo global.
 
-`ClassicLutSynth` **genera** las tablas de color con curvas propias en lugar de
-incluir las del juego de 2015. No hay ni un byte ajeno en el repositorio, que es
-lo que permite que este mod sea MIT-0. Las tablas se generan con
-`wrapMode = Clamp` y `filterMode = Bilinear`; sin eso, los extremos del rango
-se envolvían y aparecían franjas de color.
+OPTIMIZED lee `BuiltIns/Optimized.xml`, incorporado en el ensamblado. La referencia seleccionada y diferencias están en `SceneFX/docs/Default.reference.xml` y `SceneFX/docs/VALIDACION.md`. No lee RenderIt Plus por frame ni lo integra.
 
-`LutLibrary` elige la tabla según el bioma del mapa. Un bioma que no conozca se
-deja como está: es mejor no tocar que aplicar una tabla equivocada.
+`Mode` compara la receta contra el estado exportado: al editar muestra CUSTOM. Describe la configuración, no acredita disponibilidad del LUT ni ausencia de interferencias externas. `Status` comunica errores detectados.
 
-### Cuándo vale la niebla clásica
+## Contrato de incrustación
 
-`ClassicFogDriver` decide entre el efecto clásico y el moderno:
+Llamadas de UI y motor en el hilo principal de Unity, con servicios del nivel disponibles:
 
 ```csharp
-bool allowWithCycle = ModOptions.Instance.ClassicFogWithCycle;
-bool useLegacy = wantsClassic && (allowWithCycle || !cycleEnabled || !night);
+var panel = ClassicLightFX.FxModule.CreatePanel(parent, 320f, 650f);
+string xml = ClassicLightFX.FxModule.ReadState();
+bool accepted = ClassicLightFX.FxModule.ApplyState(xml);
+panel.Refresh(); // refrescar tras modificaciones externas
+panel.SetSize(320f, 700f);
+panel.Dispose(); // destruir UI no desactiva la configuración
+ClassicLightFX.FxModule.Flush();
 ```
 
-`ClassicFogWithCycle` era el único ajuste de Daylight Classic que no tenía
-equivalente aquí, y estaba fijo en «no»: de noche y con el ciclo día/noche
-activo, la niebla clásica se apagaba sola sin que nadie pudiera evitarlo.
+- `parent` es un `ColossalFramework.UI.UIComponent` del futuro host. Este conserva la referencia, visibilidad y disposición.
+- `Release()` es una acción separada: libera motor y persiste VANILLA.
+- `ApplyState` recibe la sección XML exportada del mod. Rechaza raíz ajena, texto inválido y números no finitos. No aplica parcialmente una sección con validación fallida.
+- La exportación no incluye la posición de ventana. Los campos de mundo tienen su alcance y modos explícitos.
+- `ClassicLightFXMod.ActiveClaims` informa de campos compartidos; no bloquea físicamente escrituras del motor.
+- Tamaño preferido 360×680 y mínimo 280×260. Reapertura independiente recoloca el panel dentro de la resolución actual.
 
-## Los tres looks de un clic
+Sin SDK global, RPC, plugins ni referencia a Arrebol/RenderIt Plus.
 
-| Botón | LUTs | Sol | Niebla clásica | Tinte | Con ciclo |
-|---|---|---|---|---|---|
-| **Pre-AD (2015)** | sí | color, fuerza y coordenadas | sí | sí | no |
-| **Hybrid** | sí | color, fuerza y coordenadas | no | sí | sí |
-| **Modern (2026)** | no | no | no | no | no |
+## Cooperación y guardado
 
-*Hybrid* es la combinación útil que no era obvia: la luz y el sol de 2015 con la
-niebla moderna, que sí sigue el ciclo día/noche.
+Lumen tiene prioridad para la luz que reclama; Atmosphere, para la niebla cuando está activo. Scene delega ediciones de look a Lumen activo y aplica localmente cuando está suspendido. Classic consulta reclamaciones antes de escribir/restaurar. La carga automática de Scene no sustituye las preferencias globales guardadas de Lumen.
 
-## API de suite
+La coordinación cubre los FX revisados. Otros mods, el orden real de carga y cambios tardíos de tema requieren prueba dentro del juego; no se garantiza restauración universal.
 
-`ApplySuiteSection` / `ExportSuiteSection`, públicas y estáticas. 8 etiquetas,
-todas las que se aplican se exportan:
+Estado: ClassicLightFX2.xml. Cambios agrupados durante aproximadamente un segundo, escritura temporal, reemplazo con `.bak`, pendiente hasta éxito y flush al cerrar anfitrión. Carga inválida no copia los primeros campos al estado vivo. La recuperación de `.bak` es manual; no se implementa una migración universal de formatos legados.
 
-```
-swapLuts sunColor sunStrength sunCoords
-classicFogMode classicFogTint classicFogWithCycle applyOnLoad
-```
+## Verificación
 
-## Dónde guarda las cosas
+[Estado de sesión](docs/ESTADO-SESION.md) y [paridad](docs/PARIDAD.md) distinguen controles, comportamiento, formatos y aspecto.
 
-`%LOCALAPPDATA%\Colossal Order\Cities_Skylines\ClassicLightFX2.xml`.
-
-`ModOptions` es **pública** a propósito: `XmlSerializer` exige que el tipo
-serializado y todos los que lo contienen lo sean. Mientras fue interna, el mod
-no persistía ni una opción y nadie lo notaba porque el error se tragaba en
-silencio.
-
-## Qué cambió en este ciclo
-
-**`ClassicFogWithCycle`**, el ajuste que faltaba para tener paridad completa con
-Daylight Classic.
-
-**Los tres looks de un clic** delante de los interruptores granulares, que
-siguen todos disponibles debajo.
-
-## Correcciones de la revisión
-
-- **Sin emoji.** La fuente Arial de Unity 5.6 no lleva pictogramas. Comprobado
-  sobre 12.960 ficheros `.cs` de mods que ya funcionan: ninguno los usa.
-- **La ventana vuelve a estar entera en inglés.** Se habían colado siete
-  literales en castellano junto a los controles en inglés que nadie tocó.
-
-## Atajos
-
-- `F9` — ventana del mod.
-
-## Licencia
-
-MIT-0 © 2026 juanamores98. Sin atribución ni condiciones.
-
-Este mod **no contiene código ni datos de Daylight Classic** ni de ningún otro
-mod. Reproduce el comportamiento contra los campos públicos del juego; el
-detalle está en `PROCEDENCIA.md`.
+El gradiente solar y las LUTs son aproximaciones propias; no se ha demostrado igualdad con la versión anterior a After Dark. Los objetivos históricos de potencia y tinte conservados tienen evidencia limitada, registrada en PROCEDENCIA.md. No afirmar paridad visual total ni certificación jurídica.

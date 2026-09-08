@@ -1,66 +1,44 @@
-﻿# ClassicLightFX v2
+# ClassicLightFX
 
-Recupera el aspecto clásico de **Cities: Skylines** anterior a After Dark: LUTs,
-luz solar, posición del sol y niebla. Desarrollo original de **juanamores98**.
+Controles reversibles de aspecto clÃ¡sico para Cities: Skylines 1: iluminaciÃ³n, posiciÃ³n solar, niebla y aproximaciones propias de LUTs estÃ¡ndar.
 
-## Qué hace
+## Uso
 
-**Classic lighting**:
-- *Stock LUT swap*: sustituye los LUTs del juego por los clásicos (Temperate,
-  European, Boreal, Tropical, Winter), embebidos en el DLL.
-- *Classic sun color*: gradiente de luz solar con mediodía blanco.
-- *Classic sun strength*: intensidad y exposición de la era pre-After Dark.
-- *Classic sun position*: coordenadas reales por entorno del mapa
-  (Londres/Europa, Estocolmo/Norte, Malta/Sunny, La Meca/Tropical).
+- Abrir con **F9**, o UUI opcional.
+- Panel nativo preferido: **360 Ã— 680**, mÃ­nimo 280 Ã— 260. Secciones: Light, Fog.
+- **VANILLA** libera las modificaciones del mÃ³dulo y guarda ese modo. Restaura la referencia capturada respetando compaÃ±eros detectados; un tema u otro mod puede hacer que difiera del vanilla puro.
+- **OPTIMIZED** aplica la parte de este mÃ³dulo del **Default personal de RenderIt Plus**. Es una receta de aspecto, no de rendimiento.
+- Editar controles guarda un estado personalizado. El pie distingue VANILLA, OPTIMIZED y CUSTOM segÃºn los valores configurados.
+- Los sliders incluyen entrada decimal y refresco sin escrituras por repaint.
 
-**Classic fog**:
-- *Classic fog mode*: alterna el efecto de niebla clásico y el moderno según la
-  hora y el ciclo día/noche.
-- *Classic fog tint*: tinte de cielo y longitudes de onda de dispersión
-  clásicos, evaluados por hora del día.
+Todos los efectos clÃ¡sicos desactivados. Esto es deliberado: tu DEFAULT tiene sus interruptores clÃ¡sicos apagados. Para explorar el aspecto clÃ¡sico se conservan las casillas y la acciÃ³n Â«Enable all classic featuresÂ».
 
-**General** (nuevo en v2):
-- *Apply when a map loads*: activar/desactivar la aplicación automática.
-- Presets rápidos "All classic" / "All modern" y persistencia en `ClassicLightFX2.xml`.
+## Persistencia
 
-## Compatibilidad
+Archivos globales: **ClassicLightFX2.xml**, bajo `%LOCALAPPDATA%\Colossal Order\Cities_Skylines`. Independientes de la partida. Temporal y reemplazo con copia `.bak`, pendientes que se reintentan y guardado al cerrar el anfitriÃ³n. Se conserva lectura desde la ubicaciÃ³n histÃ³rica cuando procede. Un cierre forzado durante el intervalo de guardado puede perder el Ãºltimo cambio pendiente.
 
-- Cities: Skylines **con After Dark** (el mod restaura el aspecto anterior a AD;
-  sin AD muchos ajustes no tienen efecto).
-- Se aplica al cargar el mapa y se revierte al descargarlo.
-- Puede solaparse con otros mods de iluminación: gana el último en escribir.
+Los built-ins no sobrescriben presets ya extraÃ­dos del usuario. Los botones de modo leen la receta incorporada; un antiguo archivo llamado Optimized puede contener valores distintos.
 
-## Requisitos
+## IncrustaciÃ³n futura
 
-- **No requiere Harmony** (no parchea métodos: escribe valores y añade/quita
-  componentes de render).
-- Carpeta `Locale/` junto al DLL (incluida) para las traducciones.
-- Compila contra .NET Framework 3.5 (el runtime Mono del juego lo provee).
+`FxModule.CreatePanel(parent, width, height)` crea el panel dentro de un `UIComponent`. Con padre no tiene arrastre ni botÃ³n de ventana. Ofrece `ReadState`, `ApplyState`, `Release`, `ApplyOptimized`, `Flush`, `Mode` y `Status`. Ver [arquitectura](ARQUITECTURA.md).
 
-## Instalación
+No se ha integrado con RenderIt Plus ni Arrebol; tampoco hay dependencia de esos productos.
 
-Copiar `ClassicLightFX.dll` y la carpeta `Locale/` a:
+## Compilar y verificar
 
-```
-%LOCALAPPDATA%\Colossal Order\Cities_Skylines\Addons\Mods\ClassicLightFX\
+```powershell
+dotnet build ClassicLightFX.csproj -c Release
 ```
 
-## Compilación
+Target **net35 / C# 7.3**, referencias de CS1 instalado. El build normal genera `bin/Release/net35` y **no instala**. El target de despliegue requiere `DeployMod=true`; solo debe utilizarse con autorizaciÃ³n, juego cerrado y respaldo.
 
-```
-dotnet build -c Release
-```
+Regresiones conjuntas: `SceneFX/tests/Regression/Regression.csproj`, que enlaza el cÃ³digo actual de los cuatro repos hermanos. Prueba lÃ³gica en .NET 8 con dobles del motor; no valida render ni interacciÃ³n visual.
 
-El build despliega DLL + `Locale/` automáticamente.
+## LÃ­mites
 
-## Arquitectura
+El gradiente solar y las LUTs son aproximaciones propias; no se ha demostrado igualdad con la versiÃ³n anterior a After Dark. Los objetivos histÃ³ricos de potencia y tinte conservados tienen evidencia limitada, registrada en PROCEDENCIA.md. No afirmar paridad visual total ni certificaciÃ³n jurÃ­dica.
 
-El documento ejecutivo con la arquitectura, la API de suite, las rutas de
-configuración y los cambios de cada ciclo está en
-[`ARQUITECTURA.md`](ARQUITECTURA.md). `DESIGN.md` conserva la especificación
-funcional original.
+[Paridad](docs/PARIDAD.md) Â· [Estado](docs/ESTADO-SESION.md) Â· [Procedencia](PROCEDENCIA.md). `DESIGN.md` se conserva como referencia histÃ³rica.
 
-## Licencia
-
-[MIT-0](https://spdx.org/licenses/MIT-0.html) (MIT No Attribution) © 2026 juanamores98.
-Uso, copia, modificación, venta, distribución y sublicencia sin atribución ni condiciones.
+CÃ³digo propio bajo **MIT-0**, [LICENSE](LICENSE).

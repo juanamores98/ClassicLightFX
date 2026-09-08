@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using ColossalFramework;
 using ClassicLightFX.Options;
@@ -16,30 +16,18 @@ namespace ClassicLightFX.Core
     }
 
     /// <summary>
-    /// Own implementation of the classic (pre-After Dark) look. On attach it
-    /// records whatever the game currently uses; each feature can then be
-    /// switched between the modern values and the values the pre-After Dark
-    /// release shipped with. Those numeric targets (sun power, sun curve,
-    /// city coordinates, fog tint and wavelengths) are properties of the
-    /// game itself; the code and structure around them are original to v2.
+    /// Reversible classic-style controls. The sun curve is transformed from
+    /// the current map baseline and is not a historical gradient table.
+    /// See PROCEDENCIA.md for the retained targets and remaining evidence limits.
     /// </summary>
     internal static class ClassicLook
     {
         private const float ClassicSunPower = 3.318695f;
         private const float ClassicSunExposure = 1f;
 
-        private static readonly Color32 NightSunColor = new Color32(55, 66, 77, 255);
-        private static readonly Color32 DawnSunColor = new Color32(245, 173, 84, 255);
-        private static readonly Color32 MorningSunColor = new Color32(252, 222, 186, 255);
-        private static readonly Color32 DaySunColor = new Color32(255, 255, 255, 255);
-
-        private static readonly float[] SunCurveTimes = { 0.23f, 0.26f, 0.29f, 0.35f, 0.65f, 0.71f, 0.74f, 0.77f };
-        private static readonly Color32[] SunCurveColors =
-        {
-            NightSunColor, DawnSunColor, MorningSunColor, DaySunColor,
-            DaySunColor, MorningSunColor, DawnSunColor, NightSunColor,
-        };
-
+        internal static bool Active;
+        private static readonly HashSet<ClassicFeature> Written = new HashSet<ClassicFeature>();
+        internal static bool Owns(ClassicFeature feature) { return Active && Written.Contains(feature); }
         private static Baseline _baseline;
         private static ClassicFogDriver _fogDriver;
         private static GameObject _driverHost;
@@ -87,6 +75,8 @@ namespace ClassicLightFX.Core
                 WaveLengths = dayNight.m_WaveLengths,
             };
             _warnedNotAttached = false;
+            Active = false;
+            Written.Clear();
 
             if (_driverHost == null)
             {
@@ -101,6 +91,7 @@ namespace ClassicLightFX.Core
 
         internal static void Detach()
         {
+            Active = false;
             if (_baseline != null)
             {
                 Apply(ClassicFeature.StockTables, false);
@@ -146,6 +137,19 @@ namespace ClassicLightFX.Core
                 return;
             }
 
+            string field = feature == ClassicFeature.SunGradient ? "lightColor"
+                : feature == ClassicFeature.SunPower ? "sunIntensity"
+                : feature == ClassicFeature.SunPosition ? "sunPosition" : string.Empty;
+            bool delegated = field.Length > 0 &&
+                (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", field)
+                 || Infrastructure.FxInterop.Claims("SceneFX.SceneFXMod", field));
+            if (delegated) { Written.Remove(feature); return; }
+            if (feature != ClassicFeature.FogEffect && feature != ClassicFeature.FogTint)
+            {
+                if (!classic && !Written.Remove(feature)) return;
+                if (classic) Written.Add(feature);
+            }
+
             switch (feature)
             {
                 case ClassicFeature.StockTables:
@@ -160,7 +164,8 @@ namespace ClassicLightFX.Core
                     dayNight.m_SunIntensity = classic ? ClassicSunPower : _baseline.SunPower;
 
                     // Igual que arriba: aplicar lo clásico sí; devolver lo capturado, no.
-                    if (classic || !ThemeOwnership.AtmosphereIsManaged)
+                    if (!Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "exposure")
+                        && (classic || !ThemeOwnership.AtmosphereIsManaged))
                     {
                         dayNight.m_Exposure = classic ? ClassicSunExposure : _baseline.SunExposure;
                     }
@@ -185,6 +190,8 @@ namespace ClassicLightFX.Core
         internal static void ApplyFromOptions()
         {
             var options = ModOptions.Instance;
+            Active = !options.VanillaMode;
+            if (!Active) { Release(); return; }
             Apply(ClassicFeature.StockTables, options.SwapLuts);
             Apply(ClassicFeature.SunGradient, options.SunColor);
             Apply(ClassicFeature.SunPower, options.SunStrength);
@@ -250,23 +257,28 @@ namespace ClassicLightFX.Core
             }
         }
 
+        internal static void Release()
+        {
+            Active = false;
+            Apply(ClassicFeature.StockTables, false);
+            Apply(ClassicFeature.SunGradient, false);
+            Apply(ClassicFeature.SunPower, false);
+            Apply(ClassicFeature.SunPosition, false);
+            if (_fogDriver != null) _fogDriver.Shutdown();
+        }
+
         private static Gradient BuildClassicSunCurve()
         {
-            var keys = new GradientColorKey[SunCurveTimes.Length];
-            for (int i = 0; i < SunCurveTimes.Length; i++)
+            // Own neutral daylight approximation, sampled from this map's gradient.
+            // No legacy palette or unverified eight-key arrangement is distributed.
+            if (_baseline.SunGradient == null) return null;
+            var keys = _baseline.SunGradient.colorKeys;
+            for (int i = 0; i < keys.Length; i++)
             {
-                keys[i] = new GradientColorKey(SunCurveColors[i], SunCurveTimes[i]);
+                float daylight = Mathf.Clamp01(1f - Mathf.Abs(keys[i].time - 0.5f) * 4f);
+                keys[i] = new GradientColorKey(Color.Lerp(keys[i].color, Color.white, daylight * 0.35f), keys[i].time);
             }
-
-            return new Gradient
-            {
-                colorKeys = keys,
-                alphaKeys = new[]
-                {
-                    new GradientAlphaKey(1f, 0f),
-                    new GradientAlphaKey(1f, 1f),
-                },
-            };
+            return new Gradient { colorKeys = keys, alphaKeys = _baseline.SunGradient.alphaKeys };
         }
 
         private static void SwapTables(bool classic)

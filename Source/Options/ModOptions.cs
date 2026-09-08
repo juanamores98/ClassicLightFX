@@ -1,4 +1,4 @@
-﻿using ColossalFramework.IO;
+using ColossalFramework.IO;
 using System;
 using System.IO;
 using System.Xml.Serialization;
@@ -31,7 +31,6 @@ namespace ClassicLightFX.Options
         /// <b>La migracion.</b> Si queda un archivo en el sitio antiguo y todavia no hay uno en
         /// el nuevo, se lee el antiguo: nadie pierde su configuracion por arreglar esto.
         /// </remarks>
-        private static readonly string FileName = "ClassicLightFX2.xml";
 
         private static string OptionsPath
         {
@@ -57,12 +56,12 @@ namespace ClassicLightFX.Options
 
         internal static readonly ModOptions Instance = new ModOptions();
 
-        internal bool SwapLuts = true;
-        internal bool SunColor = true;
-        internal bool SunStrength = true;
-        internal bool SunCoords = true;
-        internal bool ClassicFogMode = true;
-        internal bool ClassicFogTint = true;
+        internal bool SwapLuts;
+        internal bool SunColor;
+        internal bool SunStrength;
+        internal bool SunCoords;
+        internal bool ClassicFogMode;
+        internal bool ClassicFogTint;
         /// <summary>
         /// Si el efecto de niebla clasico se mantiene con el ciclo dia/noche activo.
         /// </summary>
@@ -73,6 +72,7 @@ namespace ClassicLightFX.Options
         /// </remarks>
         internal bool ClassicFogWithCycle;
 
+        internal bool VanillaMode = true;
         internal bool ApplyOnLoad = true;
         internal float WindowX = 920f;
         internal float WindowY = 140f;
@@ -96,8 +96,9 @@ namespace ClassicLightFX.Options
                 using (var reader = new StreamReader(OptionsPathToRead))
                 {
                     var serializer = new XmlSerializer(typeof(OptionsDocument));
-                    if (serializer.Deserialize(reader) is OptionsDocument)
+                    if (serializer.Deserialize(reader) is OptionsDocument document)
                     {
+                        document.Apply();
                         return;
                     }
                 }
@@ -130,14 +131,13 @@ namespace ClassicLightFX.Options
 
         internal static void SaveImmediate()
         {
-            _dirty = false;
+            _dirty = true;
             _lastSaveTime = Time.realtimeSinceStartup;
             try
             {
-                using (var writer = new StreamWriter(OptionsPath))
-                {
-                    new XmlSerializer(typeof(OptionsDocument)).Serialize(writer, new OptionsDocument());
-                }
+                var document = new OptionsDocument { VanillaMode = Instance.VanillaMode };
+                Infrastructure.FxStorage.WriteXml(OptionsPath, document);
+                _dirty = false;
             }
             catch (Exception e)
             {
@@ -148,19 +148,49 @@ namespace ClassicLightFX.Options
         [XmlRoot(ElementName = "classicLightFx", Namespace = "", IsNullable = false)]
         public class OptionsDocument
         {
+            public OptionsDocument() { VanillaMode = false; }
+
             [XmlAttribute("schema")]
             public int Schema = 2;
 
-            [XmlElement("swapLuts")] public bool SwapLuts { get => ModOptions.Instance.SwapLuts; set => ModOptions.Instance.SwapLuts = value; }
-            [XmlElement("sunColor")] public bool SunColor { get => ModOptions.Instance.SunColor; set => ModOptions.Instance.SunColor = value; }
-            [XmlElement("sunStrength")] public bool SunStrength { get => ModOptions.Instance.SunStrength; set => ModOptions.Instance.SunStrength = value; }
-            [XmlElement("sunCoords")] public bool SunCoords { get => ModOptions.Instance.SunCoords; set => ModOptions.Instance.SunCoords = value; }
-            [XmlElement("fogMode")] public bool ClassicFogMode { get => ModOptions.Instance.ClassicFogMode; set => ModOptions.Instance.ClassicFogMode = value; }
-            [XmlElement("fogTint")] public bool ClassicFogTint { get => ModOptions.Instance.ClassicFogTint; set => ModOptions.Instance.ClassicFogTint = value; }
-            [XmlElement("classicFogWithCycle")] public bool ClassicFogWithCycle { get => ModOptions.Instance.ClassicFogWithCycle; set => ModOptions.Instance.ClassicFogWithCycle = value; }
-            [XmlElement("applyOnLoad")] public bool ApplyOnLoad { get => ModOptions.Instance.ApplyOnLoad; set => ModOptions.Instance.ApplyOnLoad = value; }
-            [XmlElement("windowX")] public float WindowX { get => ModOptions.Instance.WindowX; set => ModOptions.Instance.WindowX = value; }
-            [XmlElement("windowY")] public float WindowY { get => ModOptions.Instance.WindowY; set => ModOptions.Instance.WindowY = value; }
+            private bool _SwapLuts = ModOptions.Instance.SwapLuts;
+            [XmlElement("swapLuts")] public bool SwapLuts { get => _SwapLuts; set => _SwapLuts = value; }
+            private bool _SunColor = ModOptions.Instance.SunColor;
+            [XmlElement("sunColor")] public bool SunColor { get => _SunColor; set => _SunColor = value; }
+            private bool _SunStrength = ModOptions.Instance.SunStrength;
+            [XmlElement("sunStrength")] public bool SunStrength { get => _SunStrength; set => _SunStrength = value; }
+            private bool _SunCoords = ModOptions.Instance.SunCoords;
+            [XmlElement("sunCoords")] public bool SunCoords { get => _SunCoords; set => _SunCoords = value; }
+            private bool _ClassicFogMode = ModOptions.Instance.ClassicFogMode;
+            [XmlElement("fogMode")] public bool ClassicFogMode { get => _ClassicFogMode; set => _ClassicFogMode = value; }
+            private bool _ClassicFogTint = ModOptions.Instance.ClassicFogTint;
+            [XmlElement("fogTint")] public bool ClassicFogTint { get => _ClassicFogTint; set => _ClassicFogTint = value; }
+            private bool _ClassicFogWithCycle = ModOptions.Instance.ClassicFogWithCycle;
+            [XmlElement("classicFogWithCycle")] public bool ClassicFogWithCycle { get => _ClassicFogWithCycle; set => _ClassicFogWithCycle = value; }
+            private bool _VanillaMode = ModOptions.Instance.VanillaMode;
+            [XmlElement("vanillaMode")] public bool VanillaMode { get => _VanillaMode; set => _VanillaMode = value; }
+            private bool _ApplyOnLoad = ModOptions.Instance.ApplyOnLoad;
+            [XmlElement("applyOnLoad")] public bool ApplyOnLoad { get => _ApplyOnLoad; set => _ApplyOnLoad = value; }
+            private float _WindowX = ModOptions.Instance.WindowX;
+            [XmlElement("windowX")] public float WindowX { get => _WindowX; set => _WindowX = Infrastructure.FxStorage.Clamp(value, -100000f, 100000f); }
+            private float _WindowY = ModOptions.Instance.WindowY;
+            [XmlElement("windowY")] public float WindowY { get => _WindowY; set => _WindowY = Infrastructure.FxStorage.Clamp(value, -100000f, 100000f); }
+
+        internal void Apply()
+        {
+            ModOptions.Instance.SwapLuts = SwapLuts;
+            ModOptions.Instance.SunColor = SunColor;
+            ModOptions.Instance.SunStrength = SunStrength;
+            ModOptions.Instance.SunCoords = SunCoords;
+            ModOptions.Instance.ClassicFogMode = ClassicFogMode;
+            ModOptions.Instance.ClassicFogTint = ClassicFogTint;
+            ModOptions.Instance.ClassicFogWithCycle = ClassicFogWithCycle;
+            ModOptions.Instance.VanillaMode = VanillaMode;
+            ModOptions.Instance.ApplyOnLoad = ApplyOnLoad;
+            ModOptions.Instance.WindowX = WindowX;
+            ModOptions.Instance.WindowY = WindowY;
+        }
+
         }
     }
 }

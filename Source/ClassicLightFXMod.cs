@@ -1,4 +1,4 @@
-﻿using ICities;
+using ICities;
 using ClassicLightFX.Core;
 using ClassicLightFX.Options;
 
@@ -10,6 +10,17 @@ namespace ClassicLightFX
     /// </summary>
     public class ClassicLightFXMod : IUserMod
     {
+        public static string ActiveClaims
+        {
+            get
+            {
+                if (!ClassicLook.Active || ModOptions.Instance.VanillaMode) return string.Empty;
+                return (ClassicLook.Owns(ClassicFeature.SunGradient) ? "lightColor," : "")
+                    + (ClassicLook.Owns(ClassicFeature.SunPower) ? "sunIntensity,exposure," : "")
+                    + (ClassicLook.Owns(ClassicFeature.SunPosition) ? "sunPosition" : "");
+            }
+        }
+
         private const string Version = "2.0.0";
 
         public string Name
@@ -19,7 +30,7 @@ namespace ClassicLightFX
 
         public string Description
         {
-            get { return "Restores the pre-After Dark lighting: LUTs, sun color, strength and position, classic fog. v" + Version; }
+            get { return "Reversible classic-style lighting: original LUT approximations, sun controls and classic fog. v" + Version; }
         }
 
         public void OnEnabled()
@@ -57,39 +68,35 @@ namespace ClassicLightFX
 
         public static bool ApplySuiteSection(System.Xml.XmlElement element)
         {
-            if (element == null)
+            if (element == null || !element.Name.Equals("classiclightfx", System.StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
             try
             {
-                var opt = ModOptions.Instance;
+                var opt = new ModOptions.OptionsDocument { VanillaMode = ModOptions.Instance.VanillaMode };
                 foreach (System.Xml.XmlNode node in element.ChildNodes)
                 {
                     if (node.NodeType != System.Xml.XmlNodeType.Element) continue;
                     string name = node.Name.ToLowerInvariant();
                     string val = node.InnerText != null ? node.InnerText.Trim() : string.Empty;
-                    bool b;
 
-                    if (name == "swapluts" && bool.TryParse(val, out b)) opt.SwapLuts = b;
-                    else if (name == "suncolor" && bool.TryParse(val, out b)) opt.SunColor = b;
-                    else if (name == "sunstrength" && bool.TryParse(val, out b)) opt.SunStrength = b;
-                    else if (name == "suncoords" && bool.TryParse(val, out b)) opt.SunCoords = b;
-                    else if (name == "classicfogmode" && bool.TryParse(val, out b)) opt.ClassicFogMode = b;
-                    else if (name == "classicfogtint" && bool.TryParse(val, out b)) opt.ClassicFogTint = b;
-                    else if (name == "classicfogwithcycle" && bool.TryParse(val, out b)) opt.ClassicFogWithCycle = b;
-                    else if (name == "applyonload" && bool.TryParse(val, out b)) opt.ApplyOnLoad = b;
+
+                    if (name == "swapluts") opt.SwapLuts = bool.Parse(val);
+                    else if (name == "suncolor") opt.SunColor = bool.Parse(val);
+                    else if (name == "sunstrength") opt.SunStrength = bool.Parse(val);
+                    else if (name == "suncoords") opt.SunCoords = bool.Parse(val);
+                    else if (name == "classicfogmode") opt.ClassicFogMode = bool.Parse(val);
+                    else if (name == "classicfogtint") opt.ClassicFogTint = bool.Parse(val);
+                    else if (name == "classicfogwithcycle") opt.ClassicFogWithCycle = bool.Parse(val);
+                    else if (name == "vanillamode") opt.VanillaMode = bool.Parse(val);
+                    else if (name == "applyonload") opt.ApplyOnLoad = bool.Parse(val);
                 }
 
-                ClassicLook.Apply(ClassicFeature.StockTables, opt.SwapLuts);
-                ClassicLook.Apply(ClassicFeature.SunGradient, opt.SunColor);
-                ClassicLook.Apply(ClassicFeature.SunPower, opt.SunStrength);
-                ClassicLook.Apply(ClassicFeature.SunPosition, opt.SunCoords);
-                ClassicLook.Apply(ClassicFeature.FogEffect, opt.ClassicFogMode);
-                ClassicLook.Apply(ClassicFeature.FogTint, opt.ClassicFogTint);
-
-                ModOptions.SaveImmediate();
+                opt.Apply();
+                ClassicLook.ApplyFromOptions();
+                ModOptions.Save();
                 return true;
             }
             catch (System.Exception e)
@@ -112,6 +119,7 @@ namespace ClassicLightFX
                 "    <classicFogTint>{5}</classicFogTint>\n" +
                 "    <classicFogWithCycle>{7}</classicFogWithCycle>\n" +
                 "    <applyOnLoad>{6}</applyOnLoad>\n" +
+                "    <vanillaMode>{8}</vanillaMode>\n" +
                 "  </classiclightfx>",
                 opt.SwapLuts.ToString().ToLowerInvariant(),
                 opt.SunColor.ToString().ToLowerInvariant(),
@@ -120,7 +128,8 @@ namespace ClassicLightFX
                 opt.ClassicFogMode.ToString().ToLowerInvariant(),
                 opt.ClassicFogTint.ToString().ToLowerInvariant(),
                 opt.ApplyOnLoad.ToString().ToLowerInvariant(),
-                opt.ClassicFogWithCycle.ToString().ToLowerInvariant());
+                opt.ClassicFogWithCycle.ToString().ToLowerInvariant(),
+                opt.VanillaMode.ToString().ToLowerInvariant());
         }
     }
 

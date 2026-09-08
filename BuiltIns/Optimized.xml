@@ -1,0 +1,11 @@
+<classiclightfx>
+  <vanillaMode>false</vanillaMode>
+  <swapLuts>false</swapLuts>
+  <sunColor>false</sunColor>
+  <sunStrength>false</sunStrength>
+  <sunCoords>false</sunCoords>
+  <classicFogMode>false</classicFogMode>
+  <classicFogTint>false</classicFogTint>
+  <classicFogWithCycle>false</classicFogWithCycle>
+  <applyOnLoad>true</applyOnLoad>
+</classiclightfx>

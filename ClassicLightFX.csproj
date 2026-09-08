@@ -14,6 +14,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Remove="tests\**\*.cs" />
+        <EmbeddedResource Include="BuiltIns\Optimized.xml" />
         <Reference Include="Assembly-CSharp" />
         <Reference Include="ColossalManaged" />
         <Reference Include="ICities" />
@@ -21,7 +23,7 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
 
-    <Target Name="DeployToModDirectory" AfterTargets="Build">
+    <Target Name="DeployToModDirectory" AfterTargets="Build" Condition="'$(DeployMod)' == 'true'">
         <PropertyGroup>
             <DeployDir>$(LOCALAPPDATA)/Colossal Order/Cities_Skylines/Addons/Mods/ClassicLightFX/</DeployDir>
         </PropertyGroup>

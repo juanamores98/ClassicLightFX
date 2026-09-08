@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using ColossalFramework;
 using ClassicLightFX.Options;
 
@@ -41,6 +41,7 @@ namespace ClassicLightFX.Core
         // el mod escribia su idea de "moderno" sobre lo que hubiera puesto el tema del mapa,
         // aunque el driver no hubiese tocado nada en toda la partida.
         private bool _tintEverApplied;
+        private bool _fogEverApplied;
 
         /// <summary>
         /// Recibe el tinte atmosferico con el que se encontro el mapa.
@@ -130,6 +131,7 @@ namespace ClassicLightFX.Core
 
         private void Update()
         {
+            if (!ClassicLook.Active || ModOptions.Instance.VanillaMode) return;
             var simulation = Singleton<SimulationManager>.instance;
             if (simulation == null)
             {
@@ -145,8 +147,9 @@ namespace ClassicLightFX.Core
             // El original tenia un interruptor para esto y aqui estaba fijo: permitir o no el
             // efecto de niebla clasico cuando el ciclo dia/noche esta activo.
             bool allowWithCycle = ModOptions.Instance.ClassicFogWithCycle;
-            bool useLegacy = wantsClassic && (allowWithCycle || !cycleEnabled || !night);
-            if (useLegacy != _lastLegacyChoice || cycleEnabled != _lastCycleState || night != _lastNightState)
+            bool useLegacy = wantsClassic && !night && (!cycleEnabled || allowWithCycle);
+            if (!wantsClassic) RestoreFogComponents();
+            else if (!_fogEverApplied || useLegacy != _lastLegacyChoice || cycleEnabled != _lastCycleState || night != _lastNightState)
             {
                 EnableLegacyFog(useLegacy);
                 _lastLegacyChoice = useLegacy;
@@ -209,6 +212,8 @@ namespace ClassicLightFX.Core
 
         private void EnableLegacyFog(bool legacy)
         {
+            if (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect")) return;
+            _fogEverApplied = true;
             if (_legacyFog != null)
             {
                 _legacyFog.enabled = legacy;
@@ -223,6 +228,9 @@ namespace ClassicLightFX.Core
         /// <summary>Devuelve los dos componentes de niebla al estado en que se encontraron.</summary>
         private void RestoreFogComponents()
         {
+            if (!_fogEverApplied) return;
+            _fogEverApplied = false;
+            if (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect")) return;
             if (_legacyFog != null && _legacyStateCaptured)
             {
                 _legacyFog.enabled = _modernLegacyEnabled;
