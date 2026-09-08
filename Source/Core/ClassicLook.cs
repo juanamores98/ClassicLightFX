@@ -217,6 +217,9 @@ namespace ClassicLightFX.Core
                 + (o.SunCoords ? "sunCoords," : "") + (o.ClassicFogMode ? "fogMode," : "")
                 + (o.ClassicFogWithCycle ? "fogWithCycle," : "");
             System.AppDomain.CurrentDomain.SetData("FX.ClassicRequests.v1", requests);
+            float latitude, longitude;
+            System.AppDomain.CurrentDomain.SetData("FX.ClassicCoordinates.v1", Active && o.SunCoords && TryGetCityCoordinates(LutLibrary.GetEnvironment(), out latitude, out longitude)
+                ? new[] { latitude, longitude } : null);
         }
 
         private static void ApplySunPosition(DayNightProperties dayNight, bool classic)

@@ -35,10 +35,10 @@ namespace ClassicLightFX
             view.Check(page0, "Apply settings when a city loads", () => Options.ModOptions.Instance.ApplyOnLoad, v => { Options.ModOptions.Instance.ApplyOnLoad = v; Options.ModOptions.Save(); });
             view.Action(page0, "Enable all classic features", () => Edit(() => { var o = Options.ModOptions.Instance; o.SwapLuts = o.SunColor = o.SunStrength = o.SunCoords = o.ClassicFogMode = o.ClassicFogTint = true; }));
             view.Info(page0, () => ClassicLightFXMod.ApplicationStatus ?? "Settings ready; appearance not yet verified in game");
-            view.Info(page0, () => "Sun: " + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? "applied through LumenFX" : "standalone") +
-                "; fog: " + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? "applied through AtmosphereFX" : "standalone"));
+            view.Info(page0, () => "Sun: " + (!Options.ModOptions.Instance.SunColor && !Options.ModOptions.Instance.SunStrength ? "off" : Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? "applied through LumenFX" : "standalone") +
+                "; fog: " + (!Options.ModOptions.Instance.ClassicFogMode ? "off" : Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? "applied through AtmosphereFX" : "standalone"));
             view.Info(page0, () => Options.ModOptions.Instance.SunCoords && Infrastructure.FxInterop.Claims("SceneFX.SceneFXMod", "sunPosition")
-                ? "Classic coordinates blocked by SceneFX's explicit position" : "Coordinates follow the selected classic option");
+                ? "Classic coordinates applied through SceneFX; its saved position is preserved" : "Coordinates follow the selected classic option");
             view.Info(page0, () => Options.ModOptions.Instance.SwapLuts && Infrastructure.FxInterop.Claims("SceneFX.SceneFXMod", "lut")
                 ? "Classic stock LUT replacement blocked while SceneFX owns LUT selection" : "Classic LUTs are procedural approximations");
             view.Refresh();
