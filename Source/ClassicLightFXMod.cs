@@ -66,7 +66,53 @@ namespace ClassicLightFX
             }
         }
 
+        public static void RefreshDerivedState() { if (Core.ClassicLook.Active) Core.ClassicLook.ApplyFromOptions(); NotifyStateChanged(); }
+        public static bool ReadyForSuite { get { return Core.ClassicLook.Attached; } }
+        public static string LastApplyError { get; private set; }
+        public static string ApplicationStatus { get; private set; }
+        public static event System.Action StateChanged;
+        public static void NotifyStateChanged()
+        {
+            var changed = StateChanged;
+            if (changed == null) return;
+            foreach (System.Action observer in changed.GetInvocationList())
+                try { observer(); } catch (System.Exception e) { UnityEngine.Debug.LogException(e); }
+        }
+        public static bool ValidateSuiteSection(string xml)
+        {
+            try
+            {
+                var doc = new System.Xml.XmlDocument { XmlResolver = null }; doc.LoadXml(xml);
+                return ParseSection(doc.DocumentElement, false);
+            }
+            catch (System.Exception e) { LastApplyError = e.Message; return false; }
+        }
         public static bool ApplySuiteSection(System.Xml.XmlElement element)
+        {
+            if (!ParseSection(element, false)) return false;
+            if (Infrastructure.FxTransaction.Active) return ParseSection(element, true);
+            string previous = ExportSuiteSection();
+            Infrastructure.FxTransaction.Begin();
+            try
+            {
+                if (!ParseSection(element, true)) throw new System.InvalidOperationException(LastApplyError);
+                Infrastructure.FxTransaction.Commit();
+                return true;
+            }
+            catch (System.Exception failure)
+            {
+                if (!Infrastructure.FxTransaction.Active) Infrastructure.FxTransaction.Begin();
+                var doc = new System.Xml.XmlDocument(); doc.LoadXml(previous);
+                bool restored = ParseSection(doc.DocumentElement, true) && ExportSuiteSection() == previous;
+                Infrastructure.FxTransaction.Abort();
+                LastApplyError = failure.Message;
+                ApplicationStatus = (restored && !failure.Message.StartsWith("PARTIAL:") ? "Failed; previous settings restored: " : "PARTIAL; rollback could not be verified: ") + failure.Message;
+                NotifyStateChanged();
+                return false;
+            }
+            finally { Infrastructure.FxTransaction.Abort(); }
+        }
+        private static bool ParseSection(System.Xml.XmlElement element, bool commit)
         {
             if (element == null || !element.Name.Equals("classiclightfx", System.StringComparison.OrdinalIgnoreCase))
             {
@@ -75,6 +121,11 @@ namespace ClassicLightFX
 
             try
             {
+                LastApplyError = string.Empty;
+                Infrastructure.FxStorage.LastError = string.Empty;
+                string schema = element.GetAttribute("schema");
+                if (schema.Length > 0 && schema != "2" && schema != "3") throw new System.ArgumentException("Unsupported preset schema: " + schema);
+
                 var opt = new ModOptions.OptionsDocument { VanillaMode = ModOptions.Instance.VanillaMode };
                 foreach (System.Xml.XmlNode node in element.ChildNodes)
                 {
@@ -94,13 +145,20 @@ namespace ClassicLightFX
                     else if (name == "applyonload") opt.ApplyOnLoad = bool.Parse(val);
                 }
 
+                if (!commit) return true;
                 opt.Apply();
                 ClassicLook.ApplyFromOptions();
-                ModOptions.Save();
+                ModOptions.SaveImmediate();
+                if (!string.IsNullOrEmpty(Infrastructure.FxStorage.LastError)) throw new System.IO.IOException(Infrastructure.FxStorage.LastError);
+                ApplicationStatus = "Applied to settings; verify appearance in game";
+                NotifyStateChanged();
                 return true;
             }
             catch (System.Exception e)
             {
+                LastApplyError = e.Message;
+                ApplicationStatus = "Failed: " + e.Message;
+
                 UnityEngine.Debug.LogException(e);
                 return false;
             }

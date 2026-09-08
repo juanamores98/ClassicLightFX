@@ -42,3 +42,8 @@ El gradiente solar y las LUTs son aproximaciones propias; no se ha demostrado ig
 [Paridad](docs/PARIDAD.md) Â· [Estado](docs/ESTADO-SESION.md) Â· [Procedencia](PROCEDENCIA.md). `DESIGN.md` se conserva como referencia histÃ³rica.
 
 CÃ³digo propio bajo **MIT-0**, [LICENSE](LICENSE).
+
+
+## Consolidación 2.1
+
+Cambios de propiedad, Game, presets y convivencia: [contrato v3 y pruebas](docs/CONSOLIDACION-v3.md). Actualizar los cuatro FX juntos para usar suites.

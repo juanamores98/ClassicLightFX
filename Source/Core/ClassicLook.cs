@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ClassicLightFX.Infrastructure;
 using UnityEngine;
 using ColossalFramework;
 using ClassicLightFX.Options;
@@ -66,13 +67,13 @@ namespace ClassicLightFX.Core
 
             _baseline = new Baseline
             {
-                SunGradient = dayNight.m_LightColor,
-                SunPower = dayNight.m_SunIntensity,
-                SunExposure = dayNight.m_Exposure,
-                Latitude = dayNight.m_Latitude,
-                Longitude = dayNight.m_Longitude,
-                SkyTint = dayNight.m_SkyTint,
-                WaveLengths = dayNight.m_WaveLengths,
+                SunGradient = PropertyLedger.Baseline<Gradient>(dayNight, "m_LightColor"),
+                SunPower = PropertyLedger.Baseline<float>(dayNight, "m_SunIntensity"),
+                SunExposure = PropertyLedger.Baseline<float>(dayNight, "m_Exposure"),
+                Latitude = PropertyLedger.Baseline<float>(dayNight, "m_Latitude"),
+                Longitude = PropertyLedger.Baseline<float>(dayNight, "m_Longitude"),
+                SkyTint = PropertyLedger.Baseline<Color>(dayNight, "m_SkyTint"),
+                WaveLengths = PropertyLedger.Baseline<Vector3>(dayNight, "m_WaveLengths"),
             };
             _warnedNotAttached = false;
             Active = false;
@@ -92,6 +93,7 @@ namespace ClassicLightFX.Core
         internal static void Detach()
         {
             Active = false;
+            System.AppDomain.CurrentDomain.SetData("FX.ClassicRequests.v1", string.Empty);
             if (_baseline != null)
             {
                 Apply(ClassicFeature.StockTables, false);
@@ -113,6 +115,8 @@ namespace ClassicLightFX.Core
                 _driverHost = null;
             }
 
+            PropertyLedger.ReleaseAll(); PropertyLedger.Forget();
+            FxInterop.RefreshCompanions();
             _tablesSwapped = false;
             ModernTableBackup.Clear();
             ThemeOwnership.Forget();
@@ -157,17 +161,20 @@ namespace ClassicLightFX.Core
                     break;
 
                 case ClassicFeature.SunGradient:
-                    dayNight.m_LightColor = classic ? BuildClassicSunCurve() : _baseline.SunGradient;
+                    if (classic) PropertyLedger.Write(dayNight, "m_LightColor", BuildClassicSunCurve());
+                    else PropertyLedger.Release(dayNight, "m_LightColor");
                     break;
 
                 case ClassicFeature.SunPower:
-                    dayNight.m_SunIntensity = classic ? ClassicSunPower : _baseline.SunPower;
+                    if (classic) PropertyLedger.Write(dayNight, "m_SunIntensity", ClassicSunPower);
+                    else PropertyLedger.Release(dayNight, "m_SunIntensity");
 
                     // Igual que arriba: aplicar lo clásico sí; devolver lo capturado, no.
                     if (!Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "exposure")
                         && (classic || !ThemeOwnership.AtmosphereIsManaged))
                     {
-                        dayNight.m_Exposure = classic ? ClassicSunExposure : _baseline.SunExposure;
+                        if (classic) PropertyLedger.Write(dayNight, "m_Exposure", ClassicSunExposure);
+                        else PropertyLedger.Release(dayNight, "m_Exposure");
                     }
 
                     break;
@@ -192,12 +199,24 @@ namespace ClassicLightFX.Core
             var options = ModOptions.Instance;
             Active = !options.VanillaMode;
             if (!Active) { Release(); return; }
+            PublishRequests();
+            FxInterop.RefreshCompanions();
             Apply(ClassicFeature.StockTables, options.SwapLuts);
             Apply(ClassicFeature.SunGradient, options.SunColor);
             Apply(ClassicFeature.SunPower, options.SunStrength);
             Apply(ClassicFeature.SunPosition, options.SunCoords);
             Apply(ClassicFeature.FogEffect, options.ClassicFogMode);
             Apply(ClassicFeature.FogTint, options.ClassicFogTint);
+        }
+
+        internal static void PublishRequests()
+        {
+            var o = ModOptions.Instance;
+            string requests = !Active || o.VanillaMode ? string.Empty
+                : (o.SunColor ? "sunColor," : "") + (o.SunStrength ? "sunStrength," : "")
+                + (o.SunCoords ? "sunCoords," : "") + (o.ClassicFogMode ? "fogMode," : "")
+                + (o.ClassicFogWithCycle ? "fogWithCycle," : "");
+            System.AppDomain.CurrentDomain.SetData("FX.ClassicRequests.v1", requests);
         }
 
         private static void ApplySunPosition(DayNightProperties dayNight, bool classic)
@@ -212,8 +231,8 @@ namespace ClassicLightFX.Core
 
             if (!classic)
             {
-                dayNight.m_Latitude = _baseline.Latitude;
-                dayNight.m_Longitude = _baseline.Longitude;
+                PropertyLedger.Release(dayNight, "m_Latitude");
+                PropertyLedger.Release(dayNight, "m_Longitude");
                 return;
             }
 
@@ -221,8 +240,8 @@ namespace ClassicLightFX.Core
             float longitude;
             if (TryGetCityCoordinates(LutLibrary.GetEnvironment(), out latitude, out longitude))
             {
-                dayNight.m_Latitude = latitude;
-                dayNight.m_Longitude = longitude;
+                PropertyLedger.Write(dayNight, "m_Latitude", latitude);
+                PropertyLedger.Write(dayNight, "m_Longitude", longitude);
             }
         }
 
@@ -260,11 +279,14 @@ namespace ClassicLightFX.Core
         internal static void Release()
         {
             Active = false;
+            PublishRequests();
+            FxInterop.RefreshCompanions();
             Apply(ClassicFeature.StockTables, false);
             Apply(ClassicFeature.SunGradient, false);
             Apply(ClassicFeature.SunPower, false);
             Apply(ClassicFeature.SunPosition, false);
             if (_fogDriver != null) _fogDriver.Shutdown();
+            PropertyLedger.ReleaseAll();
         }
 
         private static Gradient BuildClassicSunCurve()
@@ -290,6 +312,7 @@ namespace ClassicLightFX.Core
                 return;
             }
 
+            if (classic && Infrastructure.FxInterop.Claims("SceneFX.SceneFXMod", "lut")) { if (_tablesSwapped) SwapTables(false); return; }
             bool wantSwap = classic && !_tablesSwapped;
             bool wantRestore = !classic && _tablesSwapped;
             if (!wantSwap && !wantRestore)

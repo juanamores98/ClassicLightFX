@@ -11,28 +11,36 @@ namespace ClassicLightFX
     {
         public const float PreferredWidth = 360f;
         private static PanelView _standalone;
-        public static string Mode { get { return Options.ModOptions.Instance.VanillaMode ? "VANILLA" : (Infrastructure.FxStorage.MatchesOptimized(ReadState(), typeof(ClassicLightFXMod)) ? "OPTIMIZED" : "CUSTOM"); } }
+        public static string Mode { get { return Options.ModOptions.Instance.VanillaMode ? "GAME" : (Infrastructure.FxStorage.MatchesOptimized(ReadState(), typeof(ClassicLightFXMod)) ? "DEFAULT v3" : "CUSTOM"); } }
         public static string ReadState() { return ClassicLightFXMod.ExportSuiteSection(); }
         public static bool ApplyState(string xml) { return ClassicLightFXMod.ApplySuiteSection(xml); }
         public static void Release() { if (!Core.QuickPresets.ApplyVanilla()) throw new InvalidOperationException("VANILLA could not be applied."); Flush(); }
-        public static void ApplyOptimized() { if (!Core.QuickPresets.ApplyOptimized()) throw new InvalidOperationException("OPTIMIZED could not be applied."); Flush(); }
+        public static void ApplyOptimized() { if (!Core.QuickPresets.ApplyOptimized()) throw new InvalidOperationException(ClassicLightFXMod.LastApplyError ?? "Default could not be applied."); Flush(); }
         public static void Flush() { Options.ModOptions.SaveImmediate(); }
         public static string Status { get { return !string.IsNullOrEmpty(Infrastructure.FxStorage.LastError) ? Infrastructure.FxStorage.LastError : Mode + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? " · Light controlled by LumenFX" : "") + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? " · Fog controlled by AtmosphereFX" : ""); } }
 
         public static PanelView CreatePanel(UIComponent parent, float width = PreferredWidth, float height = 680f)
         {
             var view = new PanelView("ClassicLightFX", parent, width, height, Release, ApplyOptimized, () => Status);
-            var page0 = view.AddPage("Light");
+            var page0 = view.AddPage("Classic");
             view.Check(page0, "Procedural classic stock LUTs", () => Options.ModOptions.Instance.SwapLuts, v => Edit(() => Options.ModOptions.Instance.SwapLuts = v));
             view.Check(page0, "Classic daylight approximation", () => Options.ModOptions.Instance.SunColor, v => Edit(() => Options.ModOptions.Instance.SunColor = v));
             view.Check(page0, "Classic sun strength", () => Options.ModOptions.Instance.SunStrength, v => Edit(() => Options.ModOptions.Instance.SunStrength = v));
             view.Check(page0, "Classic sun coordinates", () => Options.ModOptions.Instance.SunCoords, v => Edit(() => Options.ModOptions.Instance.SunCoords = v));
-            var page1 = view.AddPage("Fog");
+            var page1 = page0;
+            view.Heading(page0, "Fog");
             view.Check(page1, "Classic fog effect", () => Options.ModOptions.Instance.ClassicFogMode, v => Edit(() => Options.ModOptions.Instance.ClassicFogMode = v));
             view.Check(page1, "Classic atmospheric tint", () => Options.ModOptions.Instance.ClassicFogTint, v => Edit(() => Options.ModOptions.Instance.ClassicFogTint = v));
             view.Check(page1, "Allow classic fog with day/night cycle", () => Options.ModOptions.Instance.ClassicFogWithCycle, v => Edit(() => Options.ModOptions.Instance.ClassicFogWithCycle = v));
             view.Check(page0, "Apply settings when a city loads", () => Options.ModOptions.Instance.ApplyOnLoad, v => { Options.ModOptions.Instance.ApplyOnLoad = v; Options.ModOptions.Save(); });
             view.Action(page0, "Enable all classic features", () => Edit(() => { var o = Options.ModOptions.Instance; o.SwapLuts = o.SunColor = o.SunStrength = o.SunCoords = o.ClassicFogMode = o.ClassicFogTint = true; }));
+            view.Info(page0, () => ClassicLightFXMod.ApplicationStatus ?? "Settings ready; appearance not yet verified in game");
+            view.Info(page0, () => "Sun: " + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? "applied through LumenFX" : "standalone") +
+                "; fog: " + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? "applied through AtmosphereFX" : "standalone"));
+            view.Info(page0, () => Options.ModOptions.Instance.SunCoords && Infrastructure.FxInterop.Claims("SceneFX.SceneFXMod", "sunPosition")
+                ? "Classic coordinates blocked by SceneFX's explicit position" : "Coordinates follow the selected classic option");
+            view.Info(page0, () => Options.ModOptions.Instance.SwapLuts && Infrastructure.FxInterop.Claims("SceneFX.SceneFXMod", "lut")
+                ? "Classic stock LUT replacement blocked while SceneFX owns LUT selection" : "Classic LUTs are procedural approximations");
             view.Refresh();
             return view;
         }
@@ -61,7 +69,7 @@ namespace ClassicLightFX
         private static void Edit(Action edit)
         {
             edit(); Options.ModOptions.Instance.VanillaMode = false;
-            Core.ClassicLook.ApplyFromOptions(); Options.ModOptions.Save();
+            Core.ClassicLook.ApplyFromOptions(); Options.ModOptions.Save(); ClassicLightFXMod.NotifyStateChanged();
         }
         private static float WindowX { get { return Options.ModOptions.Instance.WindowX; } set { Options.ModOptions.Instance.WindowX = value; } }
         private static float WindowY { get { return Options.ModOptions.Instance.WindowY; } set { Options.ModOptions.Instance.WindowY = value; } }

@@ -191,12 +191,12 @@ namespace ClassicLightFX.Core
             // RestoreModernTint—, porque se capturó antes de que el tema aplicara el suyo.
             if (_dayNight.m_SkyTint != targetTint)
             {
-                _dayNight.m_SkyTint = targetTint;
+                Infrastructure.PropertyLedger.Write(_dayNight, "m_SkyTint", targetTint);
             }
 
             if (_dayNight.m_WaveLengths != targetWavelengths)
             {
-                _dayNight.m_WaveLengths = targetWavelengths;
+                Infrastructure.PropertyLedger.Write(_dayNight, "m_WaveLengths", targetWavelengths);
             }
 
             _lastTintActive = true;
@@ -216,12 +216,12 @@ namespace ClassicLightFX.Core
             _fogEverApplied = true;
             if (_legacyFog != null)
             {
-                _legacyFog.enabled = legacy;
+                Infrastructure.PropertyLedger.Write(_legacyFog, "enabled", legacy);
             }
 
             if (_layeredFog != null)
             {
-                _layeredFog.enabled = !legacy;
+                Infrastructure.PropertyLedger.Write(_layeredFog, "enabled", !legacy);
             }
         }
 
@@ -233,12 +233,12 @@ namespace ClassicLightFX.Core
             if (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect")) return;
             if (_legacyFog != null && _legacyStateCaptured)
             {
-                _legacyFog.enabled = _modernLegacyEnabled;
+                Infrastructure.PropertyLedger.Release(_legacyFog, "enabled");
             }
 
             if (_layeredFog != null && _layeredStateCaptured)
             {
-                _layeredFog.enabled = _modernLayeredEnabled;
+                Infrastructure.PropertyLedger.Release(_layeredFog, "enabled");
             }
         }
 
@@ -248,10 +248,10 @@ namespace ClassicLightFX.Core
             {
                 if (!ThemeOwnership.AtmosphereIsManaged)
                 {
-                    _dayNight.m_SkyTint = _modernSkyTint;
+                    Infrastructure.PropertyLedger.Release(_dayNight, "m_SkyTint");
                 }
 
-                _dayNight.m_WaveLengths = _modernWavelengths;
+                Infrastructure.PropertyLedger.Release(_dayNight, "m_WaveLengths");
                 _tintEverApplied = false;
             }
         }
