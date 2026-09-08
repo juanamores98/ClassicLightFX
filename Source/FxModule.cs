@@ -17,7 +17,7 @@ namespace ClassicLightFX
         public static void Release() { if (!Core.QuickPresets.ApplyVanilla()) throw new InvalidOperationException("VANILLA could not be applied."); Flush(); }
         public static void ApplyOptimized() { if (!Core.QuickPresets.ApplyOptimized()) throw new InvalidOperationException(ClassicLightFXMod.LastApplyError ?? "Default could not be applied."); Flush(); }
         public static void Flush() { Options.ModOptions.SaveImmediate(); }
-        public static string Status { get { return !string.IsNullOrEmpty(Infrastructure.FxStorage.LastError) ? Infrastructure.FxStorage.LastError : Mode + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? " · Light controlled by LumenFX" : "") + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? " · Fog controlled by AtmosphereFX" : ""); } }
+        public static string Status { get { return !string.IsNullOrEmpty(Infrastructure.FxStorage.LastError) ? Infrastructure.FxStorage.LastError : !string.IsNullOrEmpty(Infrastructure.PropertyLedger.LastWarning) ? Infrastructure.PropertyLedger.LastWarning : Mode + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? " · Light controlled by LumenFX" : "") + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? " · Fog controlled by AtmosphereFX" : ""); } }
 
         public static PanelView CreatePanel(UIComponent parent, float width = PreferredWidth, float height = 680f)
         {

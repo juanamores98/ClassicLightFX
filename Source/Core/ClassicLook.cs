@@ -227,10 +227,6 @@ namespace ClassicLightFX.Core
             // Poner las coordenadas clásicas es una petición expresa y se atiende. Lo que no
             // se hace, con un gestor de temas presente, es devolver las capturadas: se
             // capturaron antes de que el tema aplicara las suyas, y devolverlas lo borraría.
-            if (!classic && ThemeOwnership.AtmosphereIsManaged)
-            {
-                return;
-            }
 
             if (!classic)
             {
@@ -296,14 +292,16 @@ namespace ClassicLightFX.Core
         {
             // Own neutral daylight approximation, sampled from this map's gradient.
             // No legacy palette or unverified eight-key arrangement is distributed.
-            if (_baseline.SunGradient == null) return null;
-            var keys = _baseline.SunGradient.colorKeys;
+            var dayNight = Object.FindObjectOfType<DayNightProperties>();
+            var source = dayNight == null ? null : PropertyLedger.Baseline<Gradient>(dayNight, "m_LightColor");
+            if (source == null) return null;
+            var keys = source.colorKeys;
             for (int i = 0; i < keys.Length; i++)
             {
                 float daylight = Mathf.Clamp01(1f - Mathf.Abs(keys[i].time - 0.5f) * 4f);
                 keys[i] = new GradientColorKey(Color.Lerp(keys[i].color, Color.white, daylight * 0.35f), keys[i].time);
             }
-            return new Gradient { colorKeys = keys, alphaKeys = _baseline.SunGradient.alphaKeys };
+            return new Gradient { colorKeys = keys, alphaKeys = source.alphaKeys };
         }
 
         private static void SwapTables(bool classic)

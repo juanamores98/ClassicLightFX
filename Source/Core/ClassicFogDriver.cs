@@ -182,6 +182,8 @@ namespace ClassicLightFX.Core
                 return;
             }
 
+            _modernSkyTint = Infrastructure.PropertyLedger.Baseline<Color>(_dayNight, "m_SkyTint");
+            _modernWavelengths = Infrastructure.PropertyLedger.Baseline<Vector3>(_dayNight, "m_WaveLengths");
             float ramp = DaylightRamp(_dayNight.normalizedTimeOfDay);
             Color targetTint = Color.Lerp(_modernSkyTint, ClassicSkyTint, ramp);
             Vector3 targetWavelengths = Vector3.Lerp(_modernWavelengths, ClassicWavelengths, ramp);
@@ -246,10 +248,7 @@ namespace ClassicLightFX.Core
         {
             if (_dayNight != null && _tintCaptured && _tintEverApplied)
             {
-                if (!ThemeOwnership.AtmosphereIsManaged)
-                {
-                    Infrastructure.PropertyLedger.Release(_dayNight, "m_SkyTint");
-                }
+                Infrastructure.PropertyLedger.Release(_dayNight, "m_SkyTint");
 
                 Infrastructure.PropertyLedger.Release(_dayNight, "m_WaveLengths");
                 _tintEverApplied = false;
