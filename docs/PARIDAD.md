@@ -1,4 +1,4 @@
-# Paridad de ClassicLightFX
+﻿# Paridad de ClassicLightFX
 
 Revisión: 2026-09-08. Requisitos del encargo y de la matriz de comportamiento de `ModdingResearch/EncargosFX/Auditoria-20260908/INFORME.md`. No implica adopción de implementaciones GPL.
 
@@ -15,3 +15,5 @@ Revisión: 2026-09-08. Requisitos del encargo y de la matriz de comportamiento d
 Las pruebas citadas están en `SceneFX/tests/Regression/Program.cs`. Firmas compiladas contra DLL reales; aserciones ejecutadas con dobles, no Unity. UI, imagen, tiempo de respuesta y rendimiento pendientes de observación.
 
 **No se declara paridad total.** El gradiente solar y las LUTs son aproximaciones propias; no se ha demostrado igualdad con la versión anterior a After Dark. Los objetivos históricos de potencia y tinte conservados tienen evidencia limitada, registrada en PROCEDENCIA.md. No afirmar paridad visual total ni certificación jurídica.
+
+Para la cobertura de lo que en Render It! Plus tiene licencia restrictiva -Relight, Fog Controller, Eyecandy X y Daylight Classic, que es GPL-3.0- el documento es `SceneFX/docs/RELEVO-RENDERIT-PLUS.md`.

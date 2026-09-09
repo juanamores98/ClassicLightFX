@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using ColossalFramework.UI;
 using UnityEngine;
@@ -24,19 +24,19 @@ namespace ClassicLightFX
         {
             var view = new PanelView("ClassicLightFX", parent, width, height, Release, ApplyOptimized, () => Status, () => Mode);
             var page0 = view.AddPage("Light");
-            view.Action(page0, "🏛️ Pre-After Dark (2015)", () => Edit(() => {
+            view.Action(page0, "Pre-After Dark (2015)", () => Edit(() => {
                 var o = Options.ModOptions.Instance;
                 o.SwapLuts = o.SunColor = o.SunStrength = o.SunCoords = o.ClassicFogMode = o.ClassicFogTint = true;
                 o.ClassicFogWithCycle = false;
             }));
-            view.Action(page0, "🌓 Hybrid", () => Edit(() => {
+            view.Action(page0, "Hybrid", () => Edit(() => {
                 var o = Options.ModOptions.Instance;
                 o.SwapLuts = o.SunColor = o.SunStrength = true;
                 o.SunCoords = false;
                 o.ClassicFogMode = o.ClassicFogTint = true;
                 o.ClassicFogWithCycle = true;
             }));
-            view.Action(page0, "🏙️ Modern (Vanilla)", () => Release());
+            view.Action(page0, "Modern (Vanilla)", () => Release());
             view.Check(page0, "Procedural classic stock LUTs", () => Options.ModOptions.Instance.SwapLuts, v => Edit(() => Options.ModOptions.Instance.SwapLuts = v));
             view.Check(page0, "Classic daylight approximation", () => Options.ModOptions.Instance.SunColor, v => Edit(() => Options.ModOptions.Instance.SunColor = v));
             view.Check(page0, "Classic sun strength", () => Options.ModOptions.Instance.SunStrength, v => Edit(() => Options.ModOptions.Instance.SunStrength = v));

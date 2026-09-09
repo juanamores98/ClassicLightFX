@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ClassicLightFX.Infrastructure;
 using UnityEngine;
 using ColossalFramework;
@@ -215,6 +215,9 @@ namespace ClassicLightFX.Core
             string requests = !Active || o.VanillaMode ? string.Empty
                 : (o.SunColor ? "sunColor," : "") + (o.SunStrength ? "sunStrength," : "")
                 + (o.SunCoords ? "sunCoords," : "") + (o.ClassicFogMode ? "fogMode," : "")
+                // El tinte clasico escribe m_SkyTint y m_WaveLengths, y hasta ahora no lo
+                // anunciaba: los demas FX no tenian forma de saber que ese campo tenia dueño.
+                + (o.ClassicFogTint ? "fogTint," : "")
                 + (o.ClassicFogWithCycle ? "fogWithCycle," : "");
             System.AppDomain.CurrentDomain.SetData("FX.ClassicRequests.v1", requests);
             float latitude, longitude;
