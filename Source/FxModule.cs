@@ -16,9 +16,19 @@ namespace ClassicLightFX
         public static string ReadState() { return ClassicLightFXMod.ExportSuiteSection(); }
         public static bool ApplyState(string xml) { return ClassicLightFXMod.ApplySuiteSection(xml); }
         public static void Release() { if (!Core.QuickPresets.ApplyVanilla()) throw new InvalidOperationException("VANILLA could not be applied."); Flush(); }
-        public static void ApplyOptimized() { if (!Core.QuickPresets.ApplyOptimized()) throw new InvalidOperationException(ClassicLightFXMod.LastApplyError ?? "Default could not be applied."); Flush(); }
+        public static void ApplyOptimized()
+        {
+            Infrastructure.FxStorage.LastNote = string.Empty;
+            if (!Core.QuickPresets.ApplyOptimized()) throw new InvalidOperationException(ClassicLightFXMod.LastApplyError ?? "Default could not be applied.");
+            Flush();
+
+            // Aplicar sin error no es lo mismo que quedar aplicado: otro mod puede administrar
+            // el campo. Si algo no cuajo se nombra aqui, en vez de dejar al usuario pulsando.
+            string gap = Infrastructure.FxStorage.OptimizedGap(ReadState(), typeof(ClassicLightFXMod));
+            if (gap != null) Infrastructure.FxStorage.LastNote = "Applied, but not in effect: " + gap;
+        }
         public static void Flush() { Options.ModOptions.SaveImmediate(); }
-        public static string Status { get { return !string.IsNullOrEmpty(Infrastructure.FxStorage.LastError) ? Infrastructure.FxStorage.LastError : !string.IsNullOrEmpty(Infrastructure.PropertyLedger.LastWarning) ? Infrastructure.PropertyLedger.LastWarning : "Config: " + UiText.Get(Mode) + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? " · Light controlled by LumenFX" : "") + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? " · Fog controlled by AtmosphereFX" : ""); } }
+        public static string Status { get { return !string.IsNullOrEmpty(Infrastructure.FxStorage.LastError) ? Infrastructure.FxStorage.LastError : !string.IsNullOrEmpty(Infrastructure.FxStorage.LastNote) ? Infrastructure.FxStorage.LastNote : !string.IsNullOrEmpty(Infrastructure.PropertyLedger.LastWarning) ? Infrastructure.PropertyLedger.LastWarning : "Config: " + UiText.Get(Mode) + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? " · Light controlled by LumenFX" : "") + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? " · Fog controlled by AtmosphereFX" : ""); } }
 
         public static PanelView CreatePanel(UIComponent parent, float width = PreferredWidth, float height = PreferredHeight)
         {

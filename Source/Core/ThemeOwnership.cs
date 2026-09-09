@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -46,8 +46,9 @@ namespace ClassicLightFX.Core
 
                 if (_present)
                 {
-                    Debug.Log("[ClassicLightFX] Theme Mixer administra la atmósfera: se ceden"
-                        + " el tinte del cielo, la posición solar y la exposición.");
+                    Debug.Log("[ClassicLightFX] Theme Mixer administra la atmósfera: no se devuelve"
+                        + " la exposición capturada al apagar el modo clásico."
+                        + " Aplicar lo clásico sigue funcionando.");
                 }
 
                 return _present;
