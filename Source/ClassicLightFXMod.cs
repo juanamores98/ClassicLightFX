@@ -223,12 +223,14 @@ namespace ClassicLightFX
         {
             base.OnLevelUnloading();
             UI.UuiButton.Unregister();
+            ModOptions.SaveImmediate();
             DestroyHosts();
             ClassicLook.Detach();
         }
 
         public void OnDisabled()
         {
+            ModOptions.SaveImmediate();
             ClassicLook.Detach();
             DestroyHosts();
         }

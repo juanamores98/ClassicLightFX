@@ -12,17 +12,17 @@ namespace ClassicLightFX
         public const float PreferredWidth = 380f;
         public const float PreferredHeight = 540f;
         private static PanelView _standalone;
-        public static string Mode { get { return Options.ModOptions.Instance.VanillaMode ? "GAME" : (Infrastructure.FxStorage.MatchesOptimized(ReadState(), typeof(ClassicLightFXMod)) ? "DEFAULT v3" : "CUSTOM"); } }
+        public static string Mode { get { return Options.ModOptions.Instance.VanillaMode ? "VANILLA" : (Infrastructure.FxStorage.MatchesOptimized(ReadState(), typeof(ClassicLightFXMod)) ? "OPTIMIZED" : "CUSTOM"); } }
         public static string ReadState() { return ClassicLightFXMod.ExportSuiteSection(); }
         public static bool ApplyState(string xml) { return ClassicLightFXMod.ApplySuiteSection(xml); }
         public static void Release() { if (!Core.QuickPresets.ApplyVanilla()) throw new InvalidOperationException("VANILLA could not be applied."); Flush(); }
         public static void ApplyOptimized() { if (!Core.QuickPresets.ApplyOptimized()) throw new InvalidOperationException(ClassicLightFXMod.LastApplyError ?? "Default could not be applied."); Flush(); }
         public static void Flush() { Options.ModOptions.SaveImmediate(); }
-        public static string Status { get { return !string.IsNullOrEmpty(Infrastructure.FxStorage.LastError) ? Infrastructure.FxStorage.LastError : !string.IsNullOrEmpty(Infrastructure.PropertyLedger.LastWarning) ? Infrastructure.PropertyLedger.LastWarning : Mode + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? " · Light controlled by LumenFX" : "") + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? " · Fog controlled by AtmosphereFX" : ""); } }
+        public static string Status { get { return !string.IsNullOrEmpty(Infrastructure.FxStorage.LastError) ? Infrastructure.FxStorage.LastError : !string.IsNullOrEmpty(Infrastructure.PropertyLedger.LastWarning) ? Infrastructure.PropertyLedger.LastWarning : "Config: " + UiText.Get(Mode) + (Infrastructure.FxInterop.Claims("LumenFX.LumenFXMod", "lightColor") ? " · Light controlled by LumenFX" : "") + (Infrastructure.FxInterop.Claims("AtmosphereFX.AtmosphereFXMod", "fogEffect") ? " · Fog controlled by AtmosphereFX" : ""); } }
 
         public static PanelView CreatePanel(UIComponent parent, float width = PreferredWidth, float height = PreferredHeight)
         {
-            var view = new PanelView("ClassicLightFX", parent, width, height, Release, ApplyOptimized, () => Status);
+            var view = new PanelView("ClassicLightFX", parent, width, height, Release, ApplyOptimized, () => Status, () => Mode);
             var page0 = view.AddPage("Light");
             view.Action(page0, "🏛️ Pre-After Dark (2015)", () => Edit(() => {
                 var o = Options.ModOptions.Instance;
