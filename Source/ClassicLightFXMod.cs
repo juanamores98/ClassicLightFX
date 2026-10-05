@@ -25,7 +25,7 @@ namespace ClassicLightFX
 
         public string Name
         {
-            get { return "ClassicLightFX v2"; }
+            get { return "ClassicLightFX"; }
         }
 
         public string Description
@@ -213,7 +213,7 @@ namespace ClassicLightFX
             _host.AddComponent<Core.ClassicEngine>();
 
             UI.UuiButton.Register(
-                "ClassicLightFX v2",
+                "ClassicLightFX",
                 "Classic lighting quick switches (F9)",
                 UI.TrayIcon.Make(),
                 show => Core.ClassicEngine.OpenWindow());
